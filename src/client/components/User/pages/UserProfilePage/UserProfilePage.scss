@@ -1,0 +1,75 @@
+
+.profileContainer {
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: 80% 20%;
+  grid-column-gap: 10px; 
+  grid-template-areas: 
+    "content sidebar";
+}
+
+/* CONTENT */
+
+.profileContent {
+  grid-area: content;
+
+  .infoGrid {
+    display: grid;
+    grid-template-columns: 33%;
+    grid-template-rows: 20% 30% 50%;
+    grid-template-areas: 
+      "header header header"
+      "location joined networks"
+      "bio bio bio";
+    
+      .header {
+        grid-area: header;
+      }
+
+      .location {
+        grid-area: location;
+      }
+
+      .joinDate {
+        grid-area: joined;
+      }
+
+      .socialNetworks {
+        grid-area: networks;
+      }
+
+      .bio {
+        grid-area: bio;
+      }
+  }
+
+  .meetups {
+    
+  }
+}
+
+/* SIDEBAR */
+
+.profileSidebar {
+  grid-area: sidebar;
+  display: flex;
+  flex-direction: column;
+
+  .displayPictureContainer {
+    .dp {
+      width: 100px; 
+      height: auto;
+
+      img {
+        width: 100%;
+        height: auto;
+      }
+    }
+
+  }
+
+  .interests {
+
+  }
+}

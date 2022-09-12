@@ -1,0 +1,43 @@
+
+.tierbox {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0px 5px 0px;
+}
+
+.tier {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+
+
+}
+
+.rank {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: large;
+  font-weight: bold;
+
+}
+
+.heroes {
+  flex: 9;
+  padding: 5px;
+
+  display: flex;
+  flex-wrap: wrap;
+  
+  span {
+    margin: 4px 2px 0px 2px;
+    padding: 3px;
+    border: 1px solid;
+    border-radius: 2px;
+  }
+
+
+}
+

@@ -1,0 +1,35 @@
+
+/* Layout */
+
+.headerSection {
+  display: grid;
+  grid-template-columns: 10% 80% 10%;
+  grid-template-areas: 'expansionBtn search sorting';
+}
+
+
+.filters {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+
+
+
+
+/* Individual Elements */
+
+.chevron {
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.showCollapsable {
+  display: block;
+}
+
+.hideCollapsable {
+  display: none;
+}

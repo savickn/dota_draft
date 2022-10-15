@@ -1,9 +1,4 @@
 
-const cssnext = require('postcss-cssnext');
-const cssnano = require('cssnano');
-const postcssFocus = require('postcss-focus');
-const postcssReporter = require('postcss-reporter');
-
 // for importing CSS via modules
 const cssLoaderForModules = {
   loader: 'css-loader',
@@ -31,19 +26,16 @@ const cssLoaderForGlobals = {
 const postcssLoader = {
   loader: 'postcss-loader',
   options: {
-    ident: 'postcss',
-    plugins: [
-      postcssFocus(),
-      cssnext({
-        browsers: ['last 2 versions', 'IE > 10'],
-      }),
-      cssnano({
-        autoprefixer: false,
-      }),
-      postcssReporter({
-        clearMessages: true,
-      }),
-    ]
+    postcssOptions: {
+      plugins: [
+        [
+          "postcss-preset-env",
+          {
+            // Options
+          },
+        ],
+      ],
+    },
   }
 };
 

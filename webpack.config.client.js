@@ -107,6 +107,10 @@ module.exports = function(env) {
     plugins.push(new HtmlHardDiskPlugin());
   //}
 
+  plugins.push(new webpack.ProvidePlugin({
+    process: 'process/browser',
+  }));
+
   /*if(env.mode === 'SSR') {
     plugins.push(new ManifestPlugin());
     plugins.push(new LoadablePlugin());
@@ -140,6 +144,9 @@ module.exports = function(env) {
         './src',
       ],
       extensions: ['*', '.js', '.jsx'],
+      fallback: {
+        "path": require.resolve("path-browserify")
+      },
     },
     plugins,
   };

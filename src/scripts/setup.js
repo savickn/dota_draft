@@ -9,11 +9,7 @@ import * as scrapers from './scraper/scrape';
 
 //const scrapers = require('./scraper/scrape');
 const scraperTests = require('./scraper/tests');
-//const promoScraper = require('./scraper/logic/promotions');
 
-import { checkWatchlists } from './tasks/priceDropTracker';
-import { priceDropEmailer } from './tasks/sendEmailNotification';
-import { setHeroDefaults } from './tasks/updateHeroes';
 
 const logger = Winston.createLogger({
   level: 'info',
@@ -27,22 +23,17 @@ const logger = Winston.createLogger({
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb://localhost/fashionscraper_dev')
+mongoose.connect('mongodb://localhost/dota_draft_dev')
   .then(async (db) => {
     logger.log('info', 'Connected to mongoDB!');
     console.log('Connected to MongoDB!');
     
     try {
       console.log('cli args --> ', process.argv);
-
-      let msg = await setHeroDefaults();
-      console.log(msg);
       
-      //await scraperTests.testAll();
+      await scraperTests.testAll();
       //await scrapers.scrapeAll();
       
-      //await scrapers.scrapePromos();
-      //await promoScraper.scrapeAllPromos();
     } catch(error) {
       console.error('catch block error --> ', error);
       throw error;

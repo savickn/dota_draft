@@ -7,6 +7,8 @@ import {
 } from './DraftActions';
 
 const initialState = {
+  radiant: {},
+  dire: {}, 
   recommendations: {},
   analytics: {},
 };
@@ -31,6 +33,8 @@ const DraftReducer = (state = initialState, action) => {
   }
 }
 
+export const radiant = (state) => state.draft.radiant;
+export const dire = (state) => state.draft.dire;
 export const getHeroRecommendations = (state) => state.draft.recommendations;
 export const getAnalytics = (state) => state.draft.analytics;
 

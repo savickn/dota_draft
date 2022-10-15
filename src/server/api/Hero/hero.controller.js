@@ -30,7 +30,7 @@ export const getHeroes = (req, res) => {
   };
   console.log('getHeroes --> ', query);
 
-  Hero.find(query, function(err, heroes) {
+  Hero.find(query).sort({'localized_name': 1}).exec(function(err, heroes) {
     if (err) { return res.status(500).send(err); };
     console.log('heroes --> ', heroes.length);
     return res.status(200).json({ heroes });

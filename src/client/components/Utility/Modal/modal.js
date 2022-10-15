@@ -3,16 +3,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import styles from './modal.module.scss';
+import styles from './modal.scss';
 
 import { closeModal } from './modalActions';
 import { getVisibility } from './modalReducer';
 
+// basic Modal implementation
+// cant be inside of <div> for some reason (will change z-index)
 class Modal extends React.Component {
   
   constructor(props) {
     super(props);
-    //console.log('modal props --> ', props);
     this.modalRef = React.createRef();
   }
 

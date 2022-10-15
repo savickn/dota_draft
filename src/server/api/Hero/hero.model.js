@@ -10,6 +10,20 @@ sign: positive or negative
 */
 
 
+const MatchupSchema = new Schema({
+  enemy: {
+    type: String,
+    required: true
+  },
+  disadvantage: {
+    type: String,
+    required: true
+  }, 
+  vsWinrate: { // hero winrate vs enemy
+    type: String,
+    required: true
+  }
+});
 
 
 const HeroSchema = new Schema({
@@ -64,6 +78,12 @@ const HeroSchema = new Schema({
   item_counters: [{
     type: String, // ???
   }],
+
+  winrate: {
+    type: String,
+    required: true
+  }, 
+  matchups: [MatchupSchema],
 
   // counters --> which heroes this hero counters (and why... e.g. items or talents)
   // items --> which items this hero buys

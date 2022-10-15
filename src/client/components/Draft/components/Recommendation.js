@@ -36,12 +36,16 @@ class Recommendation extends React.Component {
     if(this.state.showDire) overlay = direBtn;
 
     return (
-      <div>
-        <span>{hero.score}</span>
+      <div className={`${styles.border} flex-column`}>
         <div style={{position: 'relative', zIndex: '1'}} onClick={(e) => this.props.addHero(e, this.props.hero)}>
           <img src={src} width="128" height="72" /*onMouseOver={(evt) => this.handleMouseOver(evt)}*/ onMouseOut={(evt) => this.handleMouseOut(evt)} 
             style={{position: 'relative', zIndex: '2'}} />
           {overlay}
+        </div>
+        <div className="data">
+          <div>O: {hero.overallWinrate}</div>
+          <div>A: {hero.adjustedWinrate}</div>
+          <div>N: {hero.advantage}</div>
         </div>
       </div>
     ); 

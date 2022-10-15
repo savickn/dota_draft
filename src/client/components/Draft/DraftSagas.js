@@ -19,6 +19,12 @@ function getHeroRecommendations(query={}) {
   .catch((err) => { throw err; })
 }
 
+function getHeroRecsByWinrate(query={}) {
+  return axios.post('api/draft/byWinrate', query)
+  .then((res) => res.data )
+  .catch((err) => { throw err; })
+}
+
 
 /* sagas */
 
@@ -28,7 +34,8 @@ export function* getRecommendationsWatcher() {
 
 export function* getRecommendationsHandler(action) {
   try {
-    const res = yield call(getHeroRecommendations, action.payload);
+    //const res = yield call(getHeroRecommendations, action.payload);
+    const res = yield call(getHeroRecsByWinrate, action.payload);
     console.log(res);
     yield put(heroRecommendationSuccess(res.recommendations));
   } catch(error) {

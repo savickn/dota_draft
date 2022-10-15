@@ -1,4 +1,4 @@
-
+/*
 import redis from 'async-redis';
 //redis.debug_mode = true;
 
@@ -13,3 +13,4 @@ client.on('error', function(error) {
 });
 
 export default client;
+*/

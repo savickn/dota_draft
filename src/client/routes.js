@@ -11,7 +11,10 @@ import ProfilePage from './components/User/pages/UserProfilePage/UserProfilePage
 
 import DraftPage from './components/Draft/pages/DraftPage';
 import PractiseDraftPage from './components/Draft/pages/PractiseDraftPage';
-import QuizPage from './components/Quiz/QuizPage';
+import QuizHomePage from './components/Quiz/QuizHomePage';
+import CounterQuiz from './components/Quiz/CounterQuiz';
+import DraftCounterQuiz from './components/Quiz/DraftCounterQuiz';
+import DraftSynergyQuiz from './components/Quiz/DraftSynergyQuiz';
 
 import HeroCollectionPage from './components/Hero/pages/HeroCollectionPage';
 import HeroPage from './components/Hero/pages/HeroPage';
@@ -25,7 +28,11 @@ export default (
     <Route path="/visualizer" component={HeroVisualizerPage} />
     <Route exact path="/draft" component={DraftPage} />
     <Route path="/practiseDraft" component={PractiseDraftPage} />
-    <Route path="/quiz" component={QuizPage} />
+
+    <Route path="/quiz" component={QuizHomePage} exact />
+    <Route path="/quiz/counters" component={CounterQuiz} />
+    <Route path="/quiz/draftCounter" component={DraftCounterQuiz} />
+    <Route path="/quiz/draftSynergy" component={DraftSynergyQuiz} />
 
     <Route path="/users/new" component={SignUpPage} />
     <Route path="/users/login" component={LoginPage} />

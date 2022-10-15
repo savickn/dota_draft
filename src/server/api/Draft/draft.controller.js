@@ -2,9 +2,172 @@
 import _ from 'lodash';
 
 import Hero from '../Hero/hero.model';
+import Dotabuff from '../HeroData/h_data.model';
 
 import { binaryFeatures, } from './draft.features';
 
+
+function compareByWinrate( a, b ) {
+  if ( a.advantage > b.advantage ){
+    return -1;
+  }
+  if ( a.advantage < b.advantage ){
+    return 1;
+  }
+  return 0;
+}
+
+function compareByAdjustedWinrate( a, b ) {
+  if ( a.adjustedWinrate > b.adjustedWinrate ) return -1;
+  if ( a.adjustedWinrate < b.adjustedWinrate ) return 1;
+  return 0;
+}
+
+function getMatchupsForHero(matchups, targets) {
+  let res = {};
+  console.log('getMatchups matchups -- ', matchups);
+  console.log('getMatchups targets -- ', targets);
+  matchups.forEach((m) => {
+    if(targets.includes(m.enemy)) {
+      res[m.enemy] = [m.disadvantage, m.vsWinrate];
+    }
+  });
+  console.log('getMatchups res -- ', res);
+  return res;
+}
+
+
+export const getHeroRecommendationsByWinrate = async (req, res) => {
+  let radiant = req.body.radiant;
+  let dire = req.body.dire;
+
+  let radiantHeroNames = radiant.map((elem) => elem.localized_name);
+  let direHeroNames = dire.map((elem) => elem.localized_name);
+  let inUserHeroes = [...radiantHeroNames, ...direHeroNames];
+
+  let rQuery = {'localized_name': {$in: radiantHeroNames}};
+  let dQuery = {'localized_name': {$in: direHeroNames}};
+
+  let norArr = inUserHeroes.map((elem) => {
+    return { 'localized_name' : elem }; 
+  });
+
+  console.log('norArr -- ', norArr);
+
+  let query = {}; // hero filter query
+  
+  if(norArr.length > 0) {
+    query['$nor'] = norArr; // exclude in-use heroes
+  };
+
+  let carry = [];
+  let mid = [];
+  let offlane = [];
+  let support = [];
+  let hardSupport = [];
+
+  try {
+    let radHeroes = await Hero.find(rQuery);
+    let direHeroes = await Hero.find(dQuery);
+    let heroes = await Hero.find(query); 
+    let allData = await Dotabuff.find({});
+
+    console.log('allData -- ', allData);
+
+    let matchups = {};
+    let overallWinrates = {}; // stores overall winrates for all heroes
+
+    for(let e of allData) {
+      overallWinrates[e.hero] = e.winrate;
+      matchups[e.hero] = e.matchups;
+    }
+
+    console.log('overallWinrates -- ', overallWinrates);
+
+    let radiantData = await Dotabuff.find({'hero': { $in: radiantHeroNames }})
+    let direData = await Dotabuff.find({'hero': { $in: direHeroNames }}); 
+
+    console.log('radiantData -- ', radiantData);
+    console.log('direData -- ', direData);
+
+    let netWinrates = {}; 
+    let aggWinrates = {};
+
+    for(let d of direData) {
+      for(let m of d.matchups) {
+        let change = parseFloat(m.disadvantage);
+        netWinrates[m.enemy] = netWinrates.hasOwnProperty(m.enemy) ? 
+          netWinrates[m.enemy] + change : change;
+
+        let agg = (100 - parseFloat(m.vsWinrate));
+        aggWinrates[m.enemy] = aggWinrates.hasOwnProperty(m.enemy) ? 
+          aggWinrates[m.enemy] + agg : agg;
+      }
+    }
+
+    console.log('winrates -- ', netWinrates);
+    console.log('aggWinrates -- ', aggWinrates);
+
+    // send to client
+    for(let h of heroes) {
+      h = h.toObject();
+      h['matchups'] = matchups[h.localized_name];
+      h['advantage'] = netWinrates[h.localized_name];
+      h['adjustedWinrate'] = aggWinrates[h.localized_name] / direData.length; 
+      h['overallWinrate'] = overallWinrates[h.localized_name];
+
+      if(h.position[0] === '1') carry.push(h);
+      if(h.position[1] === '1') mid.push(h);
+      if(h.position[2] === '1') offlane.push(h);
+      if(h.position[3] === '1') support.push(h);
+      if(h.position[4] === '1') hardSupport.push(h);
+    };
+
+    let radiantRes = [];
+    for(let h of radHeroes) {
+      h = h.toObject();
+      let matchups = radiantData.filter(e => e.hero === h.localized_name)[0].matchups;
+      h['matchups'] = getMatchupsForHero(matchups, direHeroNames);
+      radiantRes.push(h);
+    }
+
+    let direRes = [];
+    for(let h of direHeroes) {
+      h = h.toObject();
+      let matchups = direData.filter(e => e.hero === h.localized_name)[0].matchups;
+      h['matchups'] = getMatchupsForHero(matchups, radiantHeroNames);
+      direRes.push(h);
+    }
+
+    // sort each category by winrate increase 
+    carry.sort(compareByAdjustedWinrate);
+    mid.sort(compareByAdjustedWinrate);
+    offlane.sort(compareByAdjustedWinrate);
+    support.sort(compareByAdjustedWinrate);
+    hardSupport.sort(compareByAdjustedWinrate);
+
+    let recommendations = { 
+      'Carry': carry.slice(0,10), 
+      'Mid' : mid.slice(0,10), 
+      'Offlane' : offlane.slice(0,10), 
+      'Support' : support.slice(0,10), 
+      'Hard Support': hardSupport.slice(0,10), 
+    }; 
+
+    let draft = {
+      'Radiant': radiantRes,
+      'Dire': direRes, 
+    }
+
+    //console.log('recommendations -- ', recommendations);
+
+    return res.status(200).json({ recommendations, draft });
+
+  } catch(err) {
+    console.log(err);
+    return res.status(500).send(err);
+  }
+}
 
 
 /* used to acquire best hero pick */

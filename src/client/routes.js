@@ -15,6 +15,7 @@ import QuizHomePage from './components/Quiz/QuizHomePage';
 import CounterQuiz from './components/Quiz/CounterQuiz';
 import DraftCounterQuiz from './components/Quiz/DraftCounterQuiz';
 import DraftSynergyQuiz from './components/Quiz/DraftSynergyQuiz';
+import LaneMatchupPage from './components/Lane/LaneMatchupPage';
 
 import HeroCollectionPage from './components/Hero/pages/HeroCollectionPage';
 import HeroPage from './components/Hero/pages/HeroPage';
@@ -27,6 +28,7 @@ export default (
     <Route path="/heroes/:pid" component={HeroPage} />
     <Route path="/visualizer" component={HeroVisualizerPage} />
     <Route exact path="/draft" component={DraftPage} />
+    <Route exact path="/lane" component={LaneMatchupPage} />
     <Route path="/practiseDraft" component={PractiseDraftPage} />
 
     <Route path="/quiz" component={QuizHomePage} exact />

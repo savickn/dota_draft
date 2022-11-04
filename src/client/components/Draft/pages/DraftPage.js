@@ -160,11 +160,12 @@ class DraftPage extends React.Component {
     });
   }
 
-
+  handleSearchInputChange = debounce(() => {
+    this.searchHeroes();
+  }, 500)
 
   searchHeroes = () => {
     let text = this.searchRef.current.value || '';
-    console.log(text);
     this.props.dispatch(searchHeroesRequest({ text }));
   }
 
@@ -222,7 +223,7 @@ class DraftPage extends React.Component {
       <div className='flex-column'>
         <div className="heroSelector">
           <div className="search">
-            <input type='search' name='search' ref={this.searchRef} className='form-control' />
+            <input type='search' name='search' ref={this.searchRef} className='form-control' onChange={(e) => this.handleSearchInputChange()} />
           </div>
           <button onClick={() => this.searchHeroes()}>Search</button>
           <div className="results flex-row">

@@ -42,10 +42,16 @@ class Recommendation extends React.Component {
             style={{position: 'relative', zIndex: '2'}} />
           {overlay}
         </div>
-        <div className="data">
-          <div>O: {hero.overallWinrate}</div>
-          <div>A: {hero.adjustedWinrate}</div>
-          <div>N: {hero.advantage}</div>
+        <div>O: {hero.winrate}</div>
+        <div className="data flex-row-even">
+          <div className="vsDire">  
+            <div>A: {hero.adjWrVsDire}</div>
+            <div>N: {hero.advantage}</div>
+          </div>
+          <div className="withRadiant">  
+            <div>A: {hero.adjWrWithRadiant}</div>
+            <div>S: {hero.synergy}</div>
+          </div>
         </div>
       </div>
     ); 

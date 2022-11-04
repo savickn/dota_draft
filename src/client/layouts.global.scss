@@ -329,6 +329,12 @@ form.form-wrapper {
   justify-content: flex-start;
 }
 
+.flex-row-even {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
 .wrappable-flex-row {
   @extend .flex-row;
   flex-wrap: wrap;

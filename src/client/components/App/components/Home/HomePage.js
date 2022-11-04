@@ -16,6 +16,7 @@ class HomePage extends React.Component {
       <div className="flex-column">
         <Link to='/heroes'>Heroes</Link>
         <Link to='/draft'>Draft Simulator</Link>
+        <Link to='/lane'>Lane Analysis</Link>
         <Link to='/visualizer'>Visualizer</Link>
         <Link to='/quiz'>Quiz</Link>
       </div>

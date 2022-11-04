@@ -15,7 +15,7 @@ const MatchupSchema = new Schema({
     type: String,
     required: true
   },
-  disadvantage: {
+  disadvantage: { // hero disadvantage vs enemy
     type: String,
     required: true
   }, 
@@ -24,6 +24,23 @@ const MatchupSchema = new Schema({
     required: true
   }
 });
+
+
+const SynergySchema = new Schema({
+  ally: {
+    type: String,
+    required: true
+  },
+  synergy: {
+    type: String,
+    required: true
+  }, 
+  withWinrate: {
+    type: String,
+    required: true
+  }
+});
+
 
 
 const HeroSchema = new Schema({
@@ -84,6 +101,7 @@ const HeroSchema = new Schema({
     required: true
   }, 
   matchups: [MatchupSchema],
+  synergies: [SynergySchema], 
 
   // counters --> which heroes this hero counters (and why... e.g. items or talents)
   // items --> which items this hero buys

@@ -4,7 +4,9 @@ import PropTypes from 'prop-types';
 
 import styles from './Recommendation.scss';
 
-class Recommendation extends React.Component {
+import { getImgSrcString, } from '../../../util/dotaHelpers';
+
+class HeroRecommendation extends React.Component {
   
   constructor(props) {
     super(props);
@@ -12,6 +14,15 @@ class Recommendation extends React.Component {
       showRadiant: false,
       showDire: false, 
     };
+  }
+
+  handleAddHero = (e) => {
+    let team = e.nativeEvent.offsetX < 64 ? 'RAD' : 'DIRE';
+    this.props.addHero(this.props.hero, team);
+  }
+
+  handleShowDetails = (e) => {
+
   }
 
   handleMouseOver = (e) => {
@@ -27,7 +38,9 @@ class Recommendation extends React.Component {
   }
   
   render() {
-    const { src, hero } = this.props;
+    const { hero, } = this.props;
+    let src = getImgSrcString(hero.localized_name);
+    //console.log(src);
     let radiantBtn = <span id="overlay_text" className="addToRadiant" style={{position: 'relative', top: '-50px', zIndex: '3'}}>Radiant</span>
     let direBtn = <span id="overlay_text" className="addToRadiant" style={{position: 'relative', top: '-50px', zIndex: '3'}}>Dire</span>
 
@@ -37,7 +50,7 @@ class Recommendation extends React.Component {
 
     return (
       <div className={`${styles.border} flex-column`}>
-        <div style={{position: 'relative', zIndex: '1'}} onClick={(e) => this.props.addHero(e, this.props.hero)}>
+        <div style={{position: 'relative', zIndex: '1'}} onClick={(e) => this.handleAddHero(e)}>
           <img src={src} width="128" height="72" /*onMouseOver={(evt) => this.handleMouseOver(evt)}*/ onMouseOut={(evt) => this.handleMouseOut(evt)} 
             style={{position: 'relative', zIndex: '2'}} />
           {overlay}
@@ -58,9 +71,10 @@ class Recommendation extends React.Component {
   }
 }
 
-Recommendation.propTypes = {
-  src: PropTypes.string.isRequired, 
-  addHero: PropTypes.func.isRequired, 
+HeroRecommendation.propTypes = {
+  hero: PropTypes.object.isRequired, 
+  addHero: PropTypes.func.isRequired, // 
+  showDetails: PropTypes.func.isRequired, // 
 }
 
-export default Recommendation;
+export default HeroRecommendation;

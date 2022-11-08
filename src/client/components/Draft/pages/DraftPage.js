@@ -4,23 +4,29 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { debounce } from 'lodash';
 
+import { getImgSrcString, } from '../../../util/dotaHelpers';
 
 /* Components */
 
 import HeroElement from '../../Hero/components/HeroElement';
 import RecommendationElement from '../components/Recommendation';
+import HeroSearch from '../../Hero/components/HeroSearch';
 import Modal from '../../Utility/Modal/modal';
 import Stats from '../components/Stats';
+import LaneMatchup from '../../Lane/LaneMatchupPage';
 
 /* Reducers */
 
-import { getHeroRecommendations, getAnalytics, } from '../DraftReducer';
+import { getRecommendations, getAnalytics, getDire, getRadiant, 
+  getSearchResults, getPositions, } from '../DraftReducer';
 import { getHeroes, } from '../../Hero/HeroReducer';
 
 /* Actions */
 
-import { heroRecommendationRequest, analyticsRequest, } from '../DraftActions';
-import { searchHeroesRequest, } from '../../Hero/HeroActions';
+import { 
+  updateRecommendationsRequest, searchRecommendationsRequest, 
+  analyticsRequest, saveDraftRequest, loadDraftRequest, 
+} from '../DraftActions';
 import { openModal, closeModal, } from '../../Utility/Modal/modalActions';
 
 
@@ -32,17 +38,23 @@ class DraftPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: '',
-      radiant: [],
-      dire: [],
+      navState: 'RECOMMENDATIONS', 
+      radiant: props.radiant,
+      dire: props.dire,
       selectedHero: {}, // represents hero shown in modal
     };
 
-    this.searchRef = React.createRef();
+    this.saveRef = React.createRef();
+    this.loadRef = React.createRef();
   }
 
-
-
+  static getDerivedStateFromProps(props, state) {
+    console.log('getDerivedstate -- ', props, state);
+    /*return {
+      radiant: props.radiant,
+      dire: props.dire, 
+    }*/
+  }
 
   componentDidMount() {
     this.getHeroRecommendations();
@@ -51,9 +63,16 @@ class DraftPage extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     //console.log('current', this.state);
     //console.log('prev', prevState);
+    
+    console.log('componentdidupdate -- ', this.state, this.props);
+    
     if(this.state.radiant != prevState.radiant || this.state.dire != prevState.dire) {
       this.getHeroRecommendations();
     }
+    // read about useEffects hooks 
+    /*if(this.props.radiant != prevProps.radiant || this.props.dire != prevProps.dire) {
+      this.setState({radiant: this.props.radiant, dire: this.props.dire});
+    }*/
   }
 
 
@@ -62,27 +81,21 @@ class DraftPage extends React.Component {
       radiant: this.state.radiant, 
       dire: this.state.dire,
     };
-    this.props.dispatch(heroRecommendationRequest(payload));
+    this.props.dispatch(updateRecommendationsRequest(payload));
   }
 
-  getImgSrcString(name) {
-    let nameArr = name.split(' ');
-    let imgString = '/assets/';
-    for(let substr of nameArr) {
-      imgString += `${substr}_`;
-    }
-    imgString += 'icon.webp';
-    return imgString;
-  }
+  handleAddHero = (hero, team) => {
+    console.log('handleAddHero -- ', hero);
 
-  handleAddHero = (e, hero) => {
     let { radiant, dire } = this.state;
-    if(e.nativeEvent.offsetX < 64) {
-      if(radiant.length < 5) radiant.push(hero);
-    } else {
-      if(dire.length < 5) dire.push(hero);
+    
+    if(team === 'RAD' && radiant.length < 5) {
+      radiant.push(hero);
+    } else if(team === 'DIRE' && dire.length < 5) {
+      dire.push(hero);
     }
-    this.setState({radiant, dire}, () => {
+
+    this.setState({ radiant, dire }, () => {
       this.getHeroRecommendations();
     });
   }
@@ -101,14 +114,14 @@ class DraftPage extends React.Component {
       if(current.localized_name !== hero.localized_name) {
         out.push(current);
       }
-    })
+    });
 
-    radiant = team === 'RAD' ? out : radiant;
-    dire = team === 'DIRE' ? out : dire;
+    radiant = (team === 'RAD') ? out : radiant;
+    dire = (team === 'DIRE') ? out : dire;
 
     this.setState({radiant, dire}, () => {
       this.getHeroRecommendations();
-    })
+    });
   }
 
   // to show more stats
@@ -141,7 +154,7 @@ class DraftPage extends React.Component {
     }
 
     let selectedHero = arr[index];
-    selectedHero['imgString'] = this.getImgSrcString(selectedHero.localized_name);
+    selectedHero['imgString'] = getImgSrcString(selectedHero.localized_name);
     selectedHero['index'] = index;
     selectedHero['arrLabel'] = arrLabel;
 
@@ -149,24 +162,15 @@ class DraftPage extends React.Component {
 
     let enemies = arrLabel === 'DIRE' ? this.state.radiant : this.state.dire;
     enemies = enemies.map(e => {
-      e.imgString = this.getImgSrcString(e.localized_name);
+      e.imgString = getImgSrcString(e.localized_name);
       return e;
     });
 
     console.log('enemies -- ', enemies);
 
     this.setState({selectedHero, enemies}, () => {
-      this.props.dispatch(openModal());
+      this.props.dispatch(openModal("stats"));
     });
-  }
-
-  handleSearchInputChange = debounce(() => {
-    this.searchHeroes();
-  }, 500)
-
-  searchHeroes = () => {
-    let text = this.searchRef.current.value || '';
-    this.props.dispatch(searchHeroesRequest({ text }));
   }
 
   resetDraft = () => {
@@ -207,38 +211,68 @@ class DraftPage extends React.Component {
     this.setState({dire: heroes});
   }
 
-  closeModal = () => {
-    // should prob save form data before closing
-    this.props.dispatch(closeModal());
+
+  /* laning functions */
+
+
+  analyzeLanes = () => {
+
   }
+
+
+  handleSearch = (text) => {
+    this.props.dispatch(searchRecommendationsRequest(text));
+    //this.props.dispatch(searchHeroesRequest({ text }));
+  }
+
+  handleNavChange = (val) => {
+    this.setState({navState: val});
+  }
+
+  openSavePrompt = () => {
+    this.props.dispatch(openModal("saveDraft"));
+  }
+
+  saveDraft = () => {
+    let text = this.saveRef.current.value || '';
+    this.props.dispatch(saveDraftRequest(text));
+  }
+
+  openLoadPrompt = () => {
+    this.props.dispatch(openModal("loadDraft"));
+  }
+
+  loadDraft = () => {
+    let text = this.loadRef.current.value || '';
+    this.props.dispatch(loadDraftRequest(text));
+  }
+
 
   // onChange --> dispatch GET_ANALYTICS and GET_HERO_RECOMMENDATIONS
 
   render() {
-    let { radiant, dire, showModal, } = this.state;
-    //console.log('draft page props --> ', this.props);
+    let { radiant, dire, showModal, navState, } = this.state;
+    let { searchResults, } = this.props;
+    console.log('draft page props --> ', this.props);
     //console.log('draft page state --> ', this.state);
+
+    let { r_C, r_M, r_O, r_4, r_5, } = this.props.positions;
+    let { d_C, d_M, d_O, d_4, d_5, } = this.props.positions;
 
     return (
       <div className='flex-column'>
-        <div className="heroSelector">
-          <div className="search">
-            <input type='search' name='search' ref={this.searchRef} className='form-control' onChange={(e) => this.handleSearchInputChange()} />
-          </div>
-          <button onClick={() => this.searchHeroes()}>Search</button>
-          <div className="results flex-row">
-            {this.props.results.slice(0, 10).map((hero) => {
-              let imgString = this.getImgSrcString(hero.localized_name);
-              return <RecommendationElement src={imgString} hero={hero} addHero={this.handleAddHero} />
-            })}
-          </div>
+        <HeroSearch search={this.handleSearch} />
+        <div className="results flex-row">
+          { searchResults.slice(0, 10).map((hero) => {
+            return <RecommendationElement hero={hero} addHero={this.handleAddHero} />
+          })}
         </div>
         <div className='draft flex-column'>
           <div className='radiant flex-column'>
             <div className='radiant-header'>RADIANT</div>
             <div className='radiant-heroes flex-row-viewport'>
               { Array.from(Array(5).keys()).map((n) => {
-                let src = radiant[n] ? this.getImgSrcString(radiant[n].localized_name) : '//:0';
+                let src = radiant[n] ? getImgSrcString(radiant[n].localized_name) : '//:0';
                 let img = <img src={src} style={{backgroundColor: 'grey'}} 
                   width='256' height='144' 
                   onClick={(e) => this.setSelectedHero(n, 'RAD')}/>;
@@ -253,7 +287,7 @@ class DraftPage extends React.Component {
             <div className='dire-header'>DIRE</div>
             <div className='dire-heroes flex-row-viewport'>
               { Array.from(Array(5).keys()).map((n) => {
-                  let src = dire[n] ? this.getImgSrcString(dire[n].localized_name) : '//:0';
+                  let src = dire[n] ? getImgSrcString(dire[n].localized_name) : '//:0';
                   let img = <img src={src} style={{backgroundColor: 'grey'}} 
                     width='256' height='144' 
                     onClick={(e) => this.setSelectedHero(n, 'DIRE')}
@@ -266,47 +300,77 @@ class DraftPage extends React.Component {
           </div>
         </div>
 
-        <button onClick={() => this.resetDraft()}>Reset</button>
+        <div className='actions flex-horizontal-center'>
+          <button onClick={() => this.resetDraft()}>Reset</button>
+          <button onClick={() => this.randomDire()}>Random</button>
+          <button onClick={() => this.openSavePrompt()}>Save</button>
+          <button onClick={() => this.openLoadPrompt()}>Load</button>
+        </div>
 
-        <button onClick={() => this.randomDire()}>Random</button>
+        <div className='navigation flex-horizontal-center'>
+          <div className="recommendation-tab minimal-btn" onClick={() => this.handleNavChange('RECOMMENDATIONS')}>Recommendations</div>
+          <div className="lane-tab minimal-btn" onClick={() => this.handleNavChange('LANING')}>Laning</div>
+          <div className="analysis-tab minimal-btn" onClick={() => this.handleNavChange('TEAMCOMP')}>Team Composition</div>
+        </div>
 
-        <Modal close={this.closeModal}> 
-          <Stats hero={this.state.selectedHero} enemies={this.state.enemies} remove={this.handleRemoveHero} />
+        <div className='nav-content'>
+          { navState === 'RECOMMENDATIONS' && 
+            <div className="recommendations flex-row-viewport">
+              { this.props.recommendations && Object.keys(this.props.recommendations).map((k) => {
+                let list = this.props.recommendations[k];
+                return (
+                  <div className={'flex-column ' + k}>
+                    <div>{k}</div>
+                    { list.slice(0, 10).map((hero) => {
+                      return <RecommendationElement hero={hero} addHero={this.handleAddHero} />
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          } 
+          { navState === 'LANING' &&
+            <div className="laning flex-row-viewport">
+              <div className="radiant-safe">
+                <div>SAFELANE</div>
+                <LaneMatchup radiant={{r_C, r_5}} dire={{d_O, d_4}} lane="SAFE" />
+              </div>
+              <div className="mid">
+                <div>MID</div>
+                <LaneMatchup radiant={{r_M}} dire={{d_M}} lane="MID" />  
+              </div>
+              <div className="radiant-off">
+                <div>OFFLANE</div>
+                <LaneMatchup radiant={{r_O, r_4}} dire={{d_C, d_5}} lane="OFF" />
+              </div>
+            </div>
+          }
+          { navState === 'TEAMCOMP' && 
+            <div className="analysis">
+              
+            </div>
+          }
+        </div>
+
+        <Modal identifier="saveDraft">
+          <input  type='text' ref={this.saveRef} className='form-control' />
+          <button onClick={() => this.saveDraft()}>Save</button>
         </Modal>
 
-        <div className="analysis">
+        <Modal identifier="loadDraft">
+          <input  type='text' ref={this.loadRef} className='form-control' />
+          <button onClick={() => this.loadDraft()}>Load</button>
+        </Modal>
 
-
-        </div>
-
-        <div className="recommendations flex-row-viewport">
-          { this.props.recommendations && Object.keys(this.props.recommendations).map((k) => {
-            //console.log(k, this.props.recommendations[k]);
-            let v = this.props.recommendations[k];
-            v.sort((a, b) => {
-              if(a.score < b.score) {
-                return 1;
-              } else if(a.score > b.score) {
-                return -1;
-              } else {
-                return 0;
-              }
-            })
-            return (
-              <div className={'flex-column ' + k}>
-                <div>{k}</div>
-                { v.slice(0, 10).map((hero) => {
-                  let imgString = this.getImgSrcString(hero.localized_name);
-                  //return <img src={imgString} width="128" height="72" />;
-                  return <RecommendationElement src={imgString} hero={hero} addHero={this.handleAddHero} />
-                })}
-              </div>
-            );
-          })}
-        </div>
+        <Modal identifier="stats"> 
+          <Stats hero={this.state.selectedHero} enemies={this.state.enemies} remove={this.handleRemoveHero} />
+        </Modal>
       </div>
     )
   }
+
+
+
 }
 
 DraftPage.propTypes = {
@@ -314,15 +378,37 @@ DraftPage.propTypes = {
   dire: PropTypes.array.isRequired, // enemy team
   analytics: PropTypes.array.isRequired, // recommended strategy 
   recommendations: PropTypes.array.isRequired, // recommended heroes
-  results: PropTypes.array.isRequired, // search results
+  searchResults: PropTypes.array.isRequired, // search results
 };
 
 const mapStateToProps = (state) => {
   return {
-    recommendations: getHeroRecommendations(state),
+    recommendations: getRecommendations(state),
+    radiant: getRadiant(state),
+    dire: getDire(state),
+    positions: getPositions(state),
     analytics: getAnalytics(state),
-    results: getHeroes(state),
+    searchResults: getSearchResults(state),
+    //searchResults: getHeroes(state),
   };
 };
 
 export default connect(mapStateToProps)(DraftPage);
+
+
+
+
+
+
+/* 
+<div className="radiant-off">
+                <div>SAFELANE</div>
+                <div className="rad">
+                  {this.buildImgArray(2, '128', '72', radiant, null)}
+                </div>
+                <div> VS. </div>
+                <div className="dire">
+                  {this.buildImgArray(2, '128', '72', dire, null)}
+                </div>
+              </div>
+              */

@@ -1,25 +1,108 @@
 
-export const HERO_RECOMMENDATION_REQUEST = 'HERO_RECOMMENDATION_REQUEST';
-export const HERO_RECOMMENDATION_SUCCESS = 'HERO_RECOMMENDATION_SUCCESS';
+export const SEARCH_RECOMMENDATIONS_REQUEST = 'SEARCH_RECOMMENDATIONS_REQUEST';
+export const SEARCH_RECOMMENDATIONS_SUCCESS = 'SEARCH_RECOMMENDATIONS_SUCCESS';
+
+export const UPDATE_RECOMMENDATIONS_REQUEST = 'UPDATE_RECOMMENDATIONS_REQUEST';
+export const UPDATE_RECOMMENDATIONS_SUCCESS = 'UPDATE_RECOMMENDATIONS_SUCCESS';
 
 export const ANALYTICS_REQUEST = 'ANALYTICS_REQUEST';
 export const ANALYTICS_SUCCESS = 'ANALYTICS_SUCCESS';
 
+export const UPDATE_DRAFT_REQUEST = 'UPDATE_DRAFT_REQUEST';
+export const UPDATE_DRAFT_SUCCESS = 'UPDATE_DRAFT_SUCCESS';
 
-export function heroRecommendationRequest(payload) {
+export const UPDATE_LANES_SUCCESS = 'UPDATE_LANES_SUCCESS';
+
+export const SAVE_DRAFT_REQUEST = 'SAVE_DRAFT_REQUEST';
+
+export const LOAD_DRAFT_REQUEST = 'LOAD_DRAFT_REQUEST';
+export const LOAD_DRAFT_SUCCESS = 'LOAD_DRAFT_SUCCESS';
+
+/* update team in redux store */ 
+
+export function updateDraftRequest() {
   return {
-    type: HERO_RECOMMENDATION_REQUEST, 
+    type: UPDATE_DRAFT_REQUEST, 
+  }
+}
+
+export function updateDraftSuccess(res) {
+  return {
+    type: UPDATE_DRAFT_SUCCESS, 
+    radiant: res.radiant,
+    dire: res.dire, 
+  }
+}
+
+
+/* send request to server to update Draft heroes */
+
+export function updateRecommendationsRequest(payload) {
+  return {
+    type: UPDATE_RECOMMENDATIONS_REQUEST, 
     payload, 
   }
 }
 
-export function heroRecommendationSuccess(recommendations) {
+export function updateRecommendationsSuccess(recommendations, radiant, dire) {
   return {
-    type: HERO_RECOMMENDATION_SUCCESS,
+    type: UPDATE_RECOMMENDATIONS_SUCCESS,
     recommendations, 
+    radiant, 
+    dire, 
   }
 }
 
+/*  */
+
+export function searchRecommendationsRequest(text) {
+  return {
+    type: SEARCH_RECOMMENDATIONS_REQUEST, 
+    text, 
+  }
+}
+
+export function searchRecommendationsSuccess(results) {
+  return {
+    type: SEARCH_RECOMMENDATIONS_SUCCESS,
+    results, 
+  }
+}
+
+/* laning requests */
+
+export function updateLanesSuccess(positions) {
+  return {
+    type: UPDATE_LANES_SUCCESS,
+    positions, 
+  }
+}
+
+/* save/load draft */
+
+export function saveDraftRequest(key) {
+  return {
+    type: SAVE_DRAFT_REQUEST,
+    key, 
+  }
+}
+
+export function loadDraftRequest(key) {
+  return {
+    type: LOAD_DRAFT_REQUEST,
+    key, 
+  }
+}
+
+export function loadDraftSuccess(draft) {
+  return {
+    type: LOAD_DRAFT_SUCCESS, 
+    draft, 
+  }
+}
+
+
+/* request for team analytics */ 
 
 export function analyticsRequest() {
   return {
@@ -33,6 +116,8 @@ export function analyticsSuccess(analytics) {
     analytics, 
   }
 }
+
+
 
 
 

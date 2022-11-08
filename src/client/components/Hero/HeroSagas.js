@@ -12,26 +12,6 @@ import {
 } from './HeroActions'; 
 
 
-// pagination (save each visited page)... reset all if new search
-function checkLocalStorage(search, pagination) {
-  const productData = JSON.parse(localStorage.getItem('product'));
-  const pageString = `${pagination.pageSize}-${pagination.currentPage}`;
-  
-  // check if 'search' query is fresh
-  const freshSearch = JSON.stringify(productData.search) === JSON.stringify(search);
-  
-  // check if pagination is fresh
-  const page = productData.search.pages[pageString];
-  const timeDiff = getDifferenceInDays(page.date.getTime(), Date.now().getTime())
-  const freshPagination = page && (timeDiff < 1); 
-
-  return {
-    freshSearch, 
-    freshPagination, 
-  };
-}
-
-
 /*
 ** API Requests
 */
@@ -69,9 +49,7 @@ function updateHero(hero, heroId) {
   .catch(err => { throw err; })
 }
 
-/* 
-** SEARCH PRODUCTS 
-*/
+/* SEARCH HEROES */
 
 export function* searchHeroesWatcher() {
   yield takeLatest(SEARCH_HEROES_REQUEST, searchHeroesHandler);
@@ -143,6 +121,8 @@ export function* updateHeroHandler(action) {
     yield put(updateHeroError(error));
   }
 }
+
+
 
 /*
 ** Export Watchers

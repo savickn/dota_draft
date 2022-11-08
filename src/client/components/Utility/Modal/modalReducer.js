@@ -2,28 +2,34 @@
 import { OPEN_MODAL, CLOSE_MODAL } from './modalActions';
 
 let initialState = {
-  isVisible: false,
+  isVisible: {},
   //childComponent: null
 };
 
 const ModalReducer = (state = initialState, action) => {
   switch(action.type) {
     case OPEN_MODAL:
-      return Object.assign({}, state, {
-        isVisible: true,
-        //childComponent: action.component
-      });
+      return {
+        ...state,
+        isVisible: {
+          ...state.isVisible,
+          [action.id]: true, 
+        }
+      };
     case CLOSE_MODAL:
-      return Object.assign({}, state, {
-        isVisible: false,
-        //childComponent: null
-      });
+      return {
+        ...state,
+        isVisible: {
+          ...state.isVisible,
+          [action.id]: false, 
+        }
+      };
     default:
       return state;
   }
 };
 
-export const getVisibility = state => state.modal.isVisible;
+export const getVisibility = (state, id) => state.modal.isVisible[id];
 //export const getComponent = state => state.modal.childComponent;
 
 export default ModalReducer;

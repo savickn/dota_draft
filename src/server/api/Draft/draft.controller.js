@@ -12,7 +12,6 @@ function compareBy(field, a, b) {
   return 0;
 }
 
-
 function compareByAdvantage( a, b ) {
   if ( a.advantage > b.advantage ) return -1;
   if ( a.advantage < b.advantage ) return 1;
@@ -57,10 +56,13 @@ function getSynergiesForHero(synergies, targets) {
 export const getHeroRecommendationsByWinrate = async (req, res) => {
   let radiant = req.body.radiant;
   let dire = req.body.dire;
+  let banned = req.body.banned ? req.body.banned : [];
 
   let radiantHeroNames = radiant.map((elem) => elem.localized_name);
   let direHeroNames = dire.map((elem) => elem.localized_name);
-  let inUserHeroes = [...radiantHeroNames, ...direHeroNames];
+  let bannedHeroNames = banned.map((elem) => elem.localized_name);
+  
+  let inUserHeroes = [...radiantHeroNames, ...direHeroNames, ...bannedHeroNames];
 
   let rQuery = {'localized_name': {$in: radiantHeroNames}};
   let dQuery = {'localized_name': {$in: direHeroNames}};
@@ -173,21 +175,25 @@ export const getHeroRecommendationsByWinrate = async (req, res) => {
     hardSupport.sort(compareByAdjustedWinrate);
 
     let recommendations = { 
-      'Carry': carry.slice(0,10), 
-      'Mid' : mid.slice(0,10), 
-      'Offlane' : offlane.slice(0,10), 
-      'Support' : support.slice(0,10), 
-      'Hard Support': hardSupport.slice(0,10), 
+      'Carry': carry, //carry.slice(0,10), 
+      'Mid' : mid, //mid.slice(0,10), 
+      'Offlane' : offlane, //offlane.slice(0,10), 
+      'Support' : support, //support.slice(0,10), 
+      'Hard Support': hardSupport, //hardSupport.slice(0,10), 
     }; 
 
     let draft = {
       'Radiant': radiantRes,
       'Dire': direRes, 
-    }
+    };
 
     //console.log('recommendations -- ', recommendations);
 
-    return res.status(200).json({ recommendations, draft });
+    return res.status(200).json({ 
+      recommendations, 
+      radiant: radiantRes,
+      dire: direRes,
+    });
 
   } catch(err) {
     console.log(err);

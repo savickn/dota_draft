@@ -81,6 +81,7 @@ class App extends React.Component {
             },
           ]}*/
         />
+        <DevTools />
         {
           this.props.isLoading ? <div>Loading...</div> :
           <div>

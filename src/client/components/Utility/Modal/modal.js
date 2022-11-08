@@ -21,11 +21,13 @@ class Modal extends React.Component {
     //console.log('modalClick --> ', se.target);
     //console.log('modalRef --> ', this.modalRef.current);
     if(se.target === this.modalRef.current) {
-      this.props.dispatch(closeModal());
+      this.props.dispatch(closeModal(this.props.identifier));
     }
   }
   
   render() {
+    //console.log('modal props -- ', this.props);
+
     //const modalCss = this.props.isVisible ? '' : '';
     return (
       <div>
@@ -44,12 +46,13 @@ class Modal extends React.Component {
 Modal.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   children: PropTypes.object.isRequired,
+  identifier: PropTypes.string.isRequired, 
   //close: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, props) => {
   return {
-    isVisible: getVisibility(state),
+    isVisible: getVisibility(state, props.identifier),
     //child: getComponent(state)
   }
 }

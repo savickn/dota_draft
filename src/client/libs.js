@@ -1,3 +1,9 @@
+
+// initialize or add to array property
+Object.prototype.addToArrayField = function(key, value) {
+  this[key] ? this[key].push(value) : this[key] = [value];
+}
+
 String.prototype.replaceAt = function(index, replacement) {
   if (index >= this.length) {
       return this.valueOf();

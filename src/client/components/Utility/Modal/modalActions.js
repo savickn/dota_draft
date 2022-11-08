@@ -2,15 +2,17 @@
 export const OPEN_MODAL = 'OPEN_MODAL';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 
-export const closeModal = () => {
+export const closeModal = (id) => {
   return {
-    type: CLOSE_MODAL
+    type: CLOSE_MODAL,
+    id, 
   }
 }
 
-export const openModal = () => {
+export const openModal = (id) => {
   return {
-    type: OPEN_MODAL
+    type: OPEN_MODAL,
+    id, 
   }
 }
 

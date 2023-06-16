@@ -16,55 +16,35 @@ class HeroRecommendation extends React.Component {
     };
   }
 
-  handleAddHero = (e) => {
-    let team = e.nativeEvent.offsetX < 64 ? 'RAD' : 'DIRE';
+  handleAddHero = (team) => {
     this.props.addHero(this.props.hero, team);
-  }
+  }  
 
+  // open info modal
   handleShowDetails = (e) => {
-
-  }
-
-  handleMouseOver = (e) => {
-    if(e.nativeEvent.offsetX < 64) {
-      this.setState({showRadiant: true, showDire: false});
-    } else {
-      this.setState({showRadiant: false, showDire: true});
-    }
-  }
-
-  handleMouseOut = (e) => {
-    this.setState({showRadiant: false, showDire: false});
+    this.props.showDetails(this.props.hero, this.props.collection);
   }
   
   render() {
     const { hero, } = this.props;
     let src = getImgSrcString(hero.localized_name);
-    //console.log(src);
-    let radiantBtn = <span id="overlay_text" className="addToRadiant" style={{position: 'relative', top: '-50px', zIndex: '3'}}>Radiant</span>
-    let direBtn = <span id="overlay_text" className="addToRadiant" style={{position: 'relative', top: '-50px', zIndex: '3'}}>Dire</span>
 
-    let overlay = null;
-    if(this.state.showRadiant) overlay = radiantBtn;
-    if(this.state.showDire) overlay = direBtn;
+    let hasDire = hero.advantage;
+    let hasRadiant = hero.synergy;
 
     return (
       <div className={`${styles.border} flex-column`}>
-        <div style={{position: 'relative', zIndex: '1'}} onClick={(e) => this.handleAddHero(e)}>
-          <img src={src} width="128" height="72" /*onMouseOver={(evt) => this.handleMouseOver(evt)}*/ onMouseOut={(evt) => this.handleMouseOut(evt)} 
-            style={{position: 'relative', zIndex: '2'}} />
-          {overlay}
+        <div className="flex-row-even">
+          <img src={src} width="128" height="72" onClick={this.handleShowDetails} />
         </div>
-        <div>O: {hero.winrate}</div>
-        <div className="data flex-row-even">
-          <div className="vsDire">  
-            <div>A: {hero.adjWrVsDire}</div>
-            <div>N: {hero.advantage}</div>
-          </div>
-          <div className="withRadiant">  
-            <div>A: {hero.adjWrWithRadiant}</div>
-            <div>S: {hero.synergy}</div>
-          </div>
+        <div className="flex-row-even">Win%: {hero.winrate}</div>
+        { hasDire ? <div className="flex-row-even">Win% vs Dire: {hero.adjWrVsDire}</div> : ''}
+        { hasDire ? <div className="flex-row-even">Advantage: {hero.advantage}%</div> : ''}
+        { hasRadiant ? <div className="flex-row-even">Win% w\ Radiant: {hero.adjWrWithRadiant}</div> : ''}
+        { hasRadiant ? <div className="flex-row-even">Synergy: {hero.synergy}</div> : ''}
+        <div className="flex-row-even">
+          <button className="minimal-btn" onClick={() => this.handleAddHero("RAD")}>Radiant</button>
+          <button className="minimal-btn" onClick={() => this.handleAddHero("DIRE")}>Dire</button>
         </div>
       </div>
     ); 
@@ -73,8 +53,40 @@ class HeroRecommendation extends React.Component {
 
 HeroRecommendation.propTypes = {
   hero: PropTypes.object.isRequired, 
+  collection: PropTypes.string.isRequired, // collection containing 'hero' 
   addHero: PropTypes.func.isRequired, // 
   showDetails: PropTypes.func.isRequired, // 
 }
 
 export default HeroRecommendation;
+
+
+/*
+
+handleAddHero = (e) => {
+  let team = e.nativeEvent.offsetX < 64 ? 'RAD' : 'DIRE';
+  this.props.addHero(this.props.hero, team);
+}
+
+handleMouseOver = (e) => {
+  if(e.nativeEvent.offsetX < 64) {
+    this.setState({showRadiant: true, showDire: false});
+  } else {
+    this.setState({showRadiant: false, showDire: true});
+  }
+}
+
+*/
+
+/*
+<div className="data flex-row-even">
+          <div className="vsDire">  
+            <div>Win% vs Dire: {hero.adjWrVsDire}</div>
+            <div>Advantage: {hero.advantage}</div>
+          </div>
+          <div className="withRadiant">  
+            <div>Win% with Radiant: {hero.adjWrWithRadiant}</div>
+            <div>Synergy: {hero.synergy}</div>
+          </div>
+        </div>
+*/

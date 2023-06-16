@@ -27,6 +27,14 @@
   margin-right: -50vw;
 }
 
+.hovered-link {
+  color: black;
+  text-decoration: none;
+  box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+  transition: all 0.3s ease 0s;
+}
+
+
 // used to create a <a> without default styling
 .unstyled-link {
   color: black;

@@ -14,6 +14,7 @@ import HeroSearch from '../../Hero/components/HeroSearch';
 import Modal from '../../Utility/Modal/modal';
 import Stats from '../components/Stats';
 import LaneMatchup from '../../Lane/LaneMatchupPage';
+import Composition from '../components/Composition';
 
 /* Reducers */
 
@@ -26,9 +27,17 @@ import { getHeroes, } from '../../Hero/HeroReducer';
 import { 
   updateRecommendationsRequest, searchRecommendationsRequest, 
   analyticsRequest, saveDraftRequest, loadDraftRequest, 
+  updateDraftRequest, updateLanesSuccess, 
 } from '../DraftActions';
 import { openModal, closeModal, } from '../../Utility/Modal/modalActions';
 
+import styles from './DraftPage.scss';
+
+
+let defaultPositions = {
+  r_C: [], r_M: [], r_O: [], r_4: [], r_5: [],
+  d_C: [], d_M: [], d_O: [], d_4: [], d_5: [],
+};
 
 /*
 ** used to show list of Products
@@ -39,8 +48,6 @@ class DraftPage extends React.Component {
     super(props);
     this.state = {
       navState: 'RECOMMENDATIONS', 
-      radiant: props.radiant,
-      dire: props.dire,
       selectedHero: {}, // represents hero shown in modal
     };
 
@@ -48,46 +55,27 @@ class DraftPage extends React.Component {
     this.loadRef = React.createRef();
   }
 
-  static getDerivedStateFromProps(props, state) {
-    console.log('getDerivedstate -- ', props, state);
-    /*return {
-      radiant: props.radiant,
-      dire: props.dire, 
-    }*/
-  }
+  static getDerivedStateFromProps(props, state) {}
 
   componentDidMount() {
-    this.getHeroRecommendations();
+    this.props.dispatch(updateRecommendationsRequest({
+      radiant: [],
+      dire: [], 
+    }));
   }
 
   componentDidUpdate(prevProps, prevState) {
     //console.log('current', this.state);
     //console.log('prev', prevState);
-    
-    console.log('componentdidupdate -- ', this.state, this.props);
-    
-    if(this.state.radiant != prevState.radiant || this.state.dire != prevState.dire) {
-      this.getHeroRecommendations();
-    }
-    // read about useEffects hooks 
-    /*if(this.props.radiant != prevProps.radiant || this.props.dire != prevProps.dire) {
-      this.setState({radiant: this.props.radiant, dire: this.props.dire});
-    }*/
   }
 
 
-  getHeroRecommendations() {
-    let payload = {
-      radiant: this.state.radiant, 
-      dire: this.state.dire,
-    };
-    this.props.dispatch(updateRecommendationsRequest(payload));
-  }
-
+  // team is ['RAD', 'DIRE']
+  // hero is hero object
   handleAddHero = (hero, team) => {
-    console.log('handleAddHero -- ', hero);
+    //console.log('handleAddHero -- ', hero);
 
-    let { radiant, dire } = this.state;
+    let { radiant, dire } = this.props;
     
     if(team === 'RAD' && radiant.length < 5) {
       radiant.push(hero);
@@ -95,18 +83,25 @@ class DraftPage extends React.Component {
       dire.push(hero);
     }
 
-    this.setState({ radiant, dire }, () => {
-      this.getHeroRecommendations();
-    });
+    this.props.dispatch(updateRecommendationsRequest({radiant, dire}));
   }
 
-  handleRemoveHero = (index, team) => {
-    let { radiant, dire } = this.state;
-    let target = team === 'RAD' ? radiant : dire;
-    let hero = team === 'RAD' ? radiant[index] : dire[index];
-    let out = [];
-
+  handleRemoveHero = (hero) => {
     if(!hero) return;
+    let { radiant, dire } = this.props;
+    console.log(radiant);
+    let target;
+    let team;
+    let out = [];
+    if(radiant.filter(r => r.localized_name === hero.localized_name).length > 0) {
+      target = radiant;
+      team = 'RAD';
+    } else if(dire.filter(d => d.localized_name === hero.localized_name).length > 0) {
+      target = dire;
+      team = 'DIRE';
+    } else {
+      return;
+    }
 
     // remove elem and compress array
     Array.from(Array(target.length).keys()).map((n) => {
@@ -119,48 +114,47 @@ class DraftPage extends React.Component {
     radiant = (team === 'RAD') ? out : radiant;
     dire = (team === 'DIRE') ? out : dire;
 
-    this.setState({radiant, dire}, () => {
-      this.getHeroRecommendations();
-    });
+    this.props.dispatch(updateRecommendationsRequest({radiant, dire}));
+    this.props.dispatch(closeModal("stats"));
   }
 
   // to show more stats
-  setSelectedHero = (index, arrLabel) => {
+  setSelectedHero = (hero, arrLabel) => {
+    console.log(arrLabel, hero);
     let arr; 
     switch(arrLabel) {
       case 'RAD':
-        arr = this.state.radiant;
+        arr = this.props.radiant;
         break;
       case 'DIRE':
-        arr = this.state.dire;
+        arr = this.props.dire;
         break;
-      case 'CARRY':
+      case 'Carry':
         arr = this.props.recommendations['Carry'];
         break;
-      case 'MID':
+      case 'Mid':
         arr = this.props.recommendations['Mid'];
         break;
-      case 'OFF':
+      case 'Offlane':
         arr = this.props.recommendations['Offlane'];
         break;
-      case 'ROAM':
+      case 'Support':
         arr = this.props.recommendations['Support'];
         break;
-      case 'SUP':
+      case 'Hard Support':
         arr = this.props.recommendations['Hard Support'];
         break;
       default:
         return;
     }
 
-    let selectedHero = arr[index];
+    let selectedHero = hero; 
     selectedHero['imgString'] = getImgSrcString(selectedHero.localized_name);
-    selectedHero['index'] = index;
     selectedHero['arrLabel'] = arrLabel;
 
     console.log('selected -- ', selectedHero);
 
-    let enemies = arrLabel === 'DIRE' ? this.state.radiant : this.state.dire;
+    let enemies = arrLabel === 'DIRE' ? this.props.radiant : this.props.dire;
     enemies = enemies.map(e => {
       e.imgString = getImgSrcString(e.localized_name);
       return e;
@@ -170,15 +164,17 @@ class DraftPage extends React.Component {
 
     this.setState({selectedHero, enemies}, () => {
       this.props.dispatch(openModal("stats"));
-    });
+    }); 
   }
 
   resetDraft = () => {
-    this.setState({ radiant: [], dire: [] });
+    this.props.dispatch(updateRecommendationsRequest({radiant: [], dire: []}));
+    //this.setState({ radiant: [], dire: [] });
+    this.props.dispatch(updateLanesSuccess(defaultPositions));
   }
 
   // working
-  randomDire = () => {
+  randomTeam = (team) => {
     let pool = this.props.recommendations;
     let heroes = [];
 
@@ -191,33 +187,59 @@ class DraftPage extends React.Component {
         let n = Math.floor(Math.random() * Math.floor(l));
         let hero = pool[k][n];
 
-        console.log('randomDire hero -- ', hero);
-        console.log('randomDire heroes -- ', heroes);
+        //console.log('randomDire hero -- ', hero); 
+        //console.log('randomDire heroes -- ', heroes); 
+        
         // check if hero already exists in array
         let exists = false;
         for(let h of heroes) {
           if(h.id === hero.id) {
             exists = true;
-          }
+          } 
         } 
 
         if(!exists) {
           heroes.push(hero);
           f = true;
-        }
+        } 
       }
-    }
+    } 
 
-    this.setState({dire: heroes});
+    let radiant = team === 'RAD' ? heroes : this.props.radiant;
+    let dire = team === 'DIRE' ? heroes : this.props.dire;
+
+    this.props.dispatch(updateRecommendationsRequest({
+      radiant, 
+      dire, 
+    }));
+    //this.setState({dire: heroes});
   }
 
 
   /* laning functions */
 
-
   analyzeLanes = () => {
 
   }
+
+  updateLane = (position, hero) => {
+    console.log(position, ' -- ', hero);
+    let positions = {};
+    console.log(this.props.positions);
+    for(let k of Object.keys(this.props.positions)) {
+      console.log(k);
+      if(k === position) {
+        positions[k] = [hero]
+      } else {
+        positions[k] = this.props.positions[k].filter(h => h.localized_name !== hero.localized_name);
+      }
+    }
+    console.log(positions);
+    this.props.dispatch(updateLanesSuccess(positions));
+  }
+
+
+  /* misc */
 
 
   handleSearch = (text) => {
@@ -251,9 +273,9 @@ class DraftPage extends React.Component {
   // onChange --> dispatch GET_ANALYTICS and GET_HERO_RECOMMENDATIONS
 
   render() {
-    let { radiant, dire, showModal, navState, } = this.state;
-    let { searchResults, } = this.props;
-    console.log('draft page props --> ', this.props);
+    let { showModal, navState, } = this.state;
+    let { searchResults, radiant, dire } = this.props;
+    //console.log('draft page props --> ', this.props);
     //console.log('draft page state --> ', this.state);
 
     let { r_C, r_M, r_O, r_4, r_5, } = this.props.positions;
@@ -264,7 +286,8 @@ class DraftPage extends React.Component {
         <HeroSearch search={this.handleSearch} />
         <div className="results flex-row">
           { searchResults.slice(0, 10).map((hero) => {
-            return <RecommendationElement hero={hero} addHero={this.handleAddHero} />
+            return <RecommendationElement hero={hero} 
+              addHero={this.handleAddHero} showDetails={this.setSelectedHero} />
           })}
         </div>
         <div className='draft flex-column'>
@@ -273,12 +296,10 @@ class DraftPage extends React.Component {
             <div className='radiant-heroes flex-row-viewport'>
               { Array.from(Array(5).keys()).map((n) => {
                 let src = radiant[n] ? getImgSrcString(radiant[n].localized_name) : '//:0';
-                let img = <img src={src} style={{backgroundColor: 'grey'}} 
+                return <img src={src} 
+                  style={{backgroundColor: 'grey'}} 
                   width='256' height='144' 
-                  onClick={(e) => this.setSelectedHero(n, 'RAD')}/>;
-                let placeholder = <button style={{backgroundColor: 'grey', width: '256', height: '144'}} />
-                return img;
-                //return radiant[n] ? img : placeholder;
+                  onClick={(e) => this.setSelectedHero(radiant[n], 'RAD')}/>;
               })}
             </div>
           </div>
@@ -288,23 +309,21 @@ class DraftPage extends React.Component {
             <div className='dire-heroes flex-row-viewport'>
               { Array.from(Array(5).keys()).map((n) => {
                   let src = dire[n] ? getImgSrcString(dire[n].localized_name) : '//:0';
-                  let img = <img src={src} style={{backgroundColor: 'grey'}} 
+                  return <img src={src} 
+                    style={{backgroundColor: 'grey'}} 
                     width='256' height='144' 
-                    onClick={(e) => this.setSelectedHero(n, 'DIRE')}
-                    />;
-                  let placeholder = <button style={{backgroundColor: 'grey', width: '256', height: '144'}} />
-                  return img;
-                  //return radiant[n] ? img : placeholder;
+                    onClick={(e) => this.setSelectedHero(dire[n], 'DIRE')}/>;
                 })}
             </div>
           </div>
         </div>
 
         <div className='actions flex-horizontal-center'>
-          <button onClick={() => this.resetDraft()}>Reset</button>
-          <button onClick={() => this.randomDire()}>Random</button>
-          <button onClick={() => this.openSavePrompt()}>Save</button>
-          <button onClick={() => this.openLoadPrompt()}>Load</button>
+          <button className="minimal-btn" onClick={() => this.resetDraft()}>Reset</button>
+          <button className="minimal-btn" onClick={() => this.randomTeam("DIRE")}>Random Dire</button>
+          <button className="minimal-btn" onClick={() => this.randomTeam("RAD")}>Random Radiant</button>
+          <button className="minimal-btn" onClick={() => this.openSavePrompt()}>Save</button>
+          <button className="minimal-btn" onClick={() => this.openLoadPrompt()}>Load</button>
         </div>
 
         <div className='navigation flex-horizontal-center'>
@@ -313,7 +332,7 @@ class DraftPage extends React.Component {
           <div className="analysis-tab minimal-btn" onClick={() => this.handleNavChange('TEAMCOMP')}>Team Composition</div>
         </div>
 
-        <div className='nav-content'>
+        <div className={`${styles['nav-content']}`}>
           { navState === 'RECOMMENDATIONS' && 
             <div className="recommendations flex-row-viewport">
               { this.props.recommendations && Object.keys(this.props.recommendations).map((k) => {
@@ -322,7 +341,8 @@ class DraftPage extends React.Component {
                   <div className={'flex-column ' + k}>
                     <div>{k}</div>
                     { list.slice(0, 10).map((hero) => {
-                      return <RecommendationElement hero={hero} addHero={this.handleAddHero} />
+                      return <RecommendationElement hero={hero} collection={k} 
+                        addHero={this.handleAddHero} showDetails={this.setSelectedHero} />
                     })}
                   </div>
                 );
@@ -333,21 +353,24 @@ class DraftPage extends React.Component {
             <div className="laning flex-row-viewport">
               <div className="radiant-safe">
                 <div>SAFELANE</div>
-                <LaneMatchup radiant={{r_C, r_5}} dire={{d_O, d_4}} lane="SAFE" />
+                <LaneMatchup radiant={{r_C, r_5}} dire={{d_O, d_4}} 
+                  lane="SAFE" updatePosition={this.updateLane} />
               </div>
               <div className="mid">
                 <div>MID</div>
-                <LaneMatchup radiant={{r_M}} dire={{d_M}} lane="MID" />  
+                <LaneMatchup radiant={{r_M}} dire={{d_M}} 
+                  lane="MID" updatePosition={this.updateLane} />  
               </div>
               <div className="radiant-off">
                 <div>OFFLANE</div>
-                <LaneMatchup radiant={{r_O, r_4}} dire={{d_C, d_5}} lane="OFF" />
+                <LaneMatchup radiant={{r_O, r_4}} dire={{d_C, d_5}} 
+                  lane="OFF" updatePosition={this.updateLane} />
               </div>
             </div>
           }
           { navState === 'TEAMCOMP' && 
             <div className="analysis">
-              
+              <Composition radiant={radiant} dire={dire} />
             </div>
           }
         </div>

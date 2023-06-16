@@ -19,6 +19,7 @@ class HomePage extends React.Component {
         <Link to='/lane'>Lane Analysis</Link>
         <Link to='/visualizer'>Visualizer</Link>
         <Link to='/quiz'>Quiz</Link>
+        <Link to='/chart'>ChartTest</Link>
       </div>
     );
   }

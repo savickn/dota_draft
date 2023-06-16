@@ -11,29 +11,33 @@ export const ANALYTICS_SUCCESS = 'ANALYTICS_SUCCESS';
 export const UPDATE_DRAFT_REQUEST = 'UPDATE_DRAFT_REQUEST';
 export const UPDATE_DRAFT_SUCCESS = 'UPDATE_DRAFT_SUCCESS';
 
-export const UPDATE_LANES_SUCCESS = 'UPDATE_LANES_SUCCESS';
-
 export const SAVE_DRAFT_REQUEST = 'SAVE_DRAFT_REQUEST';
 
 export const LOAD_DRAFT_REQUEST = 'LOAD_DRAFT_REQUEST';
 export const LOAD_DRAFT_SUCCESS = 'LOAD_DRAFT_SUCCESS';
 
+export const UPDATE_LANES_REQUEST = 'UPDATE_LANES_REQUEST';
+export const UPDATE_LANES_SUCCESS = 'UPDATE_LANES_SUCCESS';
+
+
+
 /* update team in redux store */ 
 
-export function updateDraftRequest() {
+export function updateDraftRequest(radiant, dire) {
   return {
     type: UPDATE_DRAFT_REQUEST, 
+    radiant, 
+    dire, 
   }
 }
 
-export function updateDraftSuccess(res) {
+export function updateDraftSuccess(radiant, dire) {
   return {
     type: UPDATE_DRAFT_SUCCESS, 
-    radiant: res.radiant,
-    dire: res.dire, 
+    radiant,
+    dire, 
   }
 }
-
 
 /* send request to server to update Draft heroes */
 

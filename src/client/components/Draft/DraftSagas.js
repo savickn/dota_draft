@@ -9,13 +9,149 @@ import { searchRecommendationsByName, getDraft, } from './DraftReducer';
 /* imports */
 
 import { 
+  UPDATE_DRAFT_REQUEST, UPDATE_LANES_REQUEST, 
   SEARCH_RECOMMENDATIONS_REQUEST, UPDATE_RECOMMENDATIONS_REQUEST, 
   ANALYTICS_REQUEST, SAVE_DRAFT_REQUEST, LOAD_DRAFT_REQUEST,
+  updateRecommendationsRequest, 
   searchRecommendationsSuccess, updateRecommendationsSuccess, 
   updateLanesSuccess, analyticsSuccess, loadDraftSuccess, 
 } from './DraftActions';
 
 /* helpers */
+
+function getStringCount(positionStr) {
+  let count = 0;
+  for(let char of positionStr) {
+    if(char === '1') {
+      count++;
+    }
+  }
+  return count;
+}
+
+const positionMap = ['C', 'M', 'O', '4', '5'];
+
+function getMaxAtPosition(pool, i) {
+  let posVals = pool.map(h => h.positionMatrix[i]);
+  console.log(posVals);
+  let max = Math.max(...posVals);
+  console.log('max -- ', max);
+  return max;
+}
+
+
+// only works for 5 heroes
+function mapPositions2(pool, target) {
+  let res = {};
+  let misc = [];
+  let picked = []; 
+  let done = [];
+
+  let positionOrder = {};
+  positionOrder['C'] = getMaxAtPosition(pool, 0);
+  positionOrder['M'] = getMaxAtPosition(pool, 1);
+  positionOrder['O'] = getMaxAtPosition(pool, 2);
+  positionOrder['4'] = getMaxAtPosition(pool, 3);
+  positionOrder['5'] = getMaxAtPosition(pool, 4);
+
+  console.log(positionOrder);
+
+  let sortedPositions = Object.entries(positionOrder).sort(
+    (a,b) => b[1] - a[1]);
+  
+  console.log(sortedPositions);
+
+  let i = 0;
+  while(pool.length > 0) {
+    let position = sortedPositions[i][0]; 
+    let idx = positionMap.indexOf(position); // 
+    console.log(position);
+    console.log(idx);
+
+    pool = pool.sort((h1, h2) => h2.positionMatrix[idx] - h1.positionMatrix[idx]);
+    console.log('pool -- ', pool);
+    let hero = pool[0];
+    console.log('hero -- ', hero);
+
+    res[`${target}_${position}`] = [hero];
+
+    // remove chosen hero from pool
+    pool = pool.slice(1);
+    i++;
+  }
+
+  // basically each iteration pick a hero for a position
+  /*for(let i = 0; pool.length > 0; i++) {
+    console.log(pool.length);
+    let hero;
+    
+    // sort pool
+    pool = pool.sort((h1, h2) => h2.positionMatrix[i] - h1.positionMatrix[i]);
+    console.log('pool -- ', pool);
+    hero = pool[0];
+
+    res[`${target}_${positionMap[i]}`] = [hero];
+
+    // remove chosen hero from pool
+    pool = pool.slice(1);
+  }*/
+  console.log(res);
+
+  return res;
+
+
+  /*
+    let heroes = {
+    'Carries': pool.filter(h => h.position.charAt(0) === '1'),
+    'Mids': pool.filter(h => h.position.charAt(1) === '1'),
+    'Offs': pool.filter(h => h.position.charAt(2) === '1'),
+    '4s': pool.filter(h => h.position.charAt(3) === '1'),
+    '5s': pool.filter(h => h.position.charAt(4) === '1'),
+  }
+
+  // count how many of each position
+  let positionCounts = {
+    'Carries': heroes['Carries'].length,
+    'Mids': heroes['Mids'].length,
+    'Offs': heroes['Offs'].length,
+    '4s': heroes['4s'].length,
+    '5s': heroes['5s'].length,
+  };
+
+  console.log('heroes -- ', heroes);
+  console.log(count);
+
+  let entries = Object.entries(count).sort((a,b) => a[1] - b[1]);
+
+  console.log('entries -- ', entries);
+
+  // select each hero
+  for(let i = 0; i < 5; i++) {
+    let position = entries[i][0];
+    let initial = position.charAt(0);
+    let n = entries[i][1];
+    console.log(position, n);
+
+    if(n === 1) {
+      let hero = heroes[position][0];
+      if(!picked.includes(hero.localized_name)) {
+        res[`target_${initial}`] = [hero]
+        done.push(initial);
+        picked.push(hero.localized_name);
+      } else {
+
+      }
+
+    } else if(n > 1) {
+
+    } else { // n === 0 case
+
+    }
+
+
+  }*/
+
+}
 
 // basically place heroes in correct positions... UPGRADE at some point
 function mapPositions(team, target) {
@@ -120,8 +256,8 @@ function mapPositions(team, target) {
 }
 
 function determineLanes(radiant, dire) {
-  let r = mapPositions(radiant, 'r');
-  let d = mapPositions(dire, 'd');
+  let r = mapPositions2(radiant, 'r');
+  let d = mapPositions2(dire, 'd');
   let res = Object.assign({}, r, d);
   return res;
 }
@@ -168,6 +304,25 @@ function getHeroRecsByWinrate(query={}) {
 
 /* sagas */
 
+export function* updateLanesWatcher() {
+  yield takeLatest(UPDATE_LANES_REQUEST, updateLanesHandler);
+}
+
+export function* updateLanesHandler(action) {
+  try {
+
+    // figure out lanes ... should probably only call if tab changes to 'Laning'
+    const lanes = yield call(determineLanes, radiant, dire);
+    console.log(lanes);
+
+    // send lane + draft data to redux
+    yield put(updateLanesSuccess(lanes));
+  } catch(error) {
+    console.log(error);
+  }
+}
+
+
 export function* getRecommendationsWatcher() {
   yield takeLatest(UPDATE_RECOMMENDATIONS_REQUEST, getRecommendationsHandler);
 }
@@ -177,7 +332,6 @@ export function* getRecommendationsHandler(action) {
     // get draft data from server
     const { recommendations, radiant, dire } = yield call(getHeroRecsByWinrate, action.payload);
     
-    // figure out lanes ... should probably only call if tab changes to 'Laning'
     const lanes = yield call(determineLanes, radiant, dire);
     console.log(lanes);
 
@@ -229,6 +383,7 @@ export function* loadDraftHandler(action) {
     let draft = yield call(getFromLocalStorage, action.key);
     console.log(draft);
     yield put(loadDraftSuccess(draft));
+    yield put(updateRecommendationsRequest(draft));
     // maybe add some success message
   } catch(error) {
     console.log(error);

@@ -22,13 +22,17 @@ class Stats extends React.Component {
       advantage += parseFloat(-matchup.disadvantage);
     }
 
-    let adjustedWinrate = aggWr / enemies.length;
+    let adjustedWinrate = (aggWr / enemies.length).toFixed(2);
 
     return {
       matchups,
-      advantage, 
+      advantage: advantage.toFixed(2), 
       adjustedWinrate, 
     };
+  }
+
+  handleRemove = () => {
+    this.props.remove(this.props.hero);
   }
   
   render() {
@@ -42,21 +46,22 @@ class Stats extends React.Component {
 
     return (
       <div className="flex-column">
-        <div className="flex-row matchups">
+        <div className="flex-row-viewport matchups">
           <div className="flex-column currentHero">
             <div>
               <img src={src} width="128" height="72" />
             </div>
             <div className="data">
-              <div>O: {hero.overallWinrate}</div>
+              <div>O: {hero.winrate}</div>
               <div>A: {adjustedWinrate}</div>
               <div>N: {advantage}</div>
+              <button className="minimal-btn" onClick={this.handleRemove}>Remove</button>
             </div>
           </div>
           {matchups && Object.keys(matchups).map((k) => {
             let m = matchups[k];
             return (
-              <div>
+              <div className="flex-column">
                 <div>
                   <img src={m.imgString} width="128" height="72" />
                 </div>

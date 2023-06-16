@@ -22,6 +22,10 @@ class Modal extends React.Component {
     //console.log('modalRef --> ', this.modalRef.current);
     if(se.target === this.modalRef.current) {
       this.props.dispatch(closeModal(this.props.identifier));
+
+      if(this.props.close) {
+        this.props.close();
+      }
     }
   }
   
@@ -47,7 +51,7 @@ Modal.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   children: PropTypes.object.isRequired,
   identifier: PropTypes.string.isRequired, 
-  //close: PropTypes.func.isRequired,
+  close: PropTypes.func, // for extra functionality when closing modal
 };
 
 const mapStateToProps = (state, props) => {

@@ -54,9 +54,17 @@ export const updateHero = (req, res) => {
   console.log('_id --> ', req.params.id);
   console.log('update hero --> ', newHero);
 
+  console.log('body -- ', req.body);
+
+  let updateObj = {
+    $set: req.body,
+  }
+
+  console.log(updateObj);
+
   Hero.findOneAndUpdate(
     {'_id': req.params.id},
-    newHero,
+    updateObj,
     {upsert: true, new: true},
     function (err, hero) {
       if(err) return res.status(500).send(err);

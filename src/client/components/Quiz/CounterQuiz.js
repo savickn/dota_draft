@@ -11,11 +11,16 @@ import HeroIcon from '../Hero/components/HeroIcon';
 import { searchHeroesRequest, } from '../Hero/HeroActions';
 import { getHeroes, } from '../Hero/HeroReducer';
 
-const questions = [
-  'What hero counters the hero shown below?',
-  'What item counters the hero shown below?', 
+import styles from './quiz.scss';
 
+const questions = [
+  'Choose the top hero counter for the hero shown below.',
+  'Choose the top item counter for the hero shown below.', 
+  'Choose the best hero for complete the current draft.',
+  'Choose the best hero to counter the following draft.'
 ];
+
+
 
 // show hero and ask for counters (either item or hero)
 class CounterQuiz extends React.Component {
@@ -26,8 +31,13 @@ class CounterQuiz extends React.Component {
       score: 0,
       question: null,
       result: null,
-      qHero: null,
-      aHero: null, 
+
+      qHero: null, // hero question is based on
+      aHero: null, // chosen hero
+      
+      choices: [], // heroes from which to choose answer
+      correct: [], // correct answers
+
       isActive: false, // game is either started or stopped
       questionInProgress: false, // question is either answered or not 
     };
@@ -43,6 +53,76 @@ class CounterQuiz extends React.Component {
   })
 
 
+  
+
+  // evaluates an answer
+  // red is selected but incorrect
+  // green is selected and correct
+  // blue is not selected and correct
+  selectAnswer = (hero) => {
+    console.log(hero);
+
+    let { correct, score, } = this.state;
+
+    let correctNames = correct.map(c => c.localized_name);
+
+    if(correctNames.includes(hero.localized_name)) {
+      score++;
+    }
+
+    this.setState({ aHero: hero, score, questionInProgress: false });
+  }
+
+
+
+
+
+  getBestCounter = (hero, options) => {
+    console.log(hero);
+    console.log(options);
+    let optionNames = options.map(h => h.localized_name);
+    let counters = hero.matchups.filter(m => optionNames.includes(m.enemy));
+    console.log(counters);
+    let sorted = counters.sort((a,b) => b.disadvantage - a.disadvantage);
+    console.log(sorted);
+    let bestCounter = sorted[0].enemy;
+
+    return options.filter(o => o.localized_name === bestCounter);
+  }
+
+  getBestSynergy = () => {
+
+  }
+
+
+  // populates a question
+  getQuestion = () => {
+    let n = 9;
+
+    // choose question hero
+    let pool = this.props.heroes;
+    let r = Math.floor(Math.random() * Math.floor(pool.length));
+    let qHero = pool[r];
+    pool.splice(r, 1);
+
+    // pick question
+    let question = questions[0];
+
+    // pick choices
+    const shuffled = pool.sort(() => 0.5 - Math.random());
+    let choices = shuffled.slice(0, n);
+
+    // pick correct
+    let correct = this.getBestCounter(qHero, choices);
+    console.log('correct -- ', correct);
+
+    this.setState({ question, qHero, choices, correct, questionInProgress: true});
+  }
+
+
+  /* Game Flow */
+
+  // start game
   start = () => {
     this.setState({ score: 0, isActive: true }, () => {
       this.getQuestion();
@@ -56,32 +136,45 @@ class CounterQuiz extends React.Component {
     });
   }
 
-  // evaluates an answer
-  selectAnswer = (hero) => {
 
 
+  // used to style answer (right, wrong, etc)
+  getHeroStyle = (hero) => {
+    let style = '';
+    let { aHero, correct } = this.state;
+    if(!hero || !aHero) return '';
 
-    this.setState({ aHero: hero, questionInProgress: false });
+    // if selected
+    if(hero.localized_name === aHero.localized_name) {
+      // if correct --> make blue
+      if(correct.filter(c => c.localized_name === aHero.localized_name).length > 0) {
+        style = styles.correct_selected;
+      } else { // if incorrect --> make red
+        style = styles.incorrect_selected;
+      }
+    } else { // if unselected
+      // if correct --> make green 
+      if(correct.filter(c => c.localized_name === hero.localized_name).length > 0) {
+        style = styles.correct;
+      }
+    }
+    return style;
   }
 
-  // populates a question
-  getQuestion = () => {
-    const heroes = this.props.heroes;
-    let n = Math.floor(Math.random() * Math.floor(heroes.length));
-
-    let question = questions[0];
-    let qHero = heroes[n];
-
-    this.setState({question, qHero, questionInProgress: true});
-  }
   
   render() {
     const { heroes, } = this.props;
-    const { score, question, result, qHero, aHero, 
+    const { score, question, result, choices, correct, qHero, aHero, 
       questionInProgress, isActive, } = this.state;
 
-    return (
-      <div className="flex-column">
+    console.log(this.state);
+
+    return heroes.length > 0 ? ( 
+      <div className="flex-column-center">
+        <div>
+          <button className='minimal-btn' onClick={() => this.start()}>Start</button>
+        </div>
+        <div>{score}</div>
         <div className="flex-row">
           <div className="question">
             <div className="text">
@@ -89,14 +182,6 @@ class CounterQuiz extends React.Component {
             </div>
             <div className="questionHero">
               {qHero && <HeroIcon hero={qHero} clickHandler={null} />}
-            </div>
-          </div>
-          <div className="answer">
-            <div className="result">  
-              {result}
-            </div>
-            <div className="answerHero">
-              {aHero && <HeroIcon hero={aHero} clickHandler={null} />}
             </div>
           </div>
           <div className="next">
@@ -107,22 +192,22 @@ class CounterQuiz extends React.Component {
         </div>
 
         <div className="choices wrappable-flex-row">
-          {questionInProgress && heroes.map((h) => {
+          {choices.map((h) => {
+            let heroStyle = this.getHeroStyle(h);
             if(h.localized_name !== qHero.localized_name) {
               return (
-                <div>
-                  <HeroIcon hero={h} clickHandler={this.selectAnswer} />
+                <div className={`${styles.flex_33}`}>
+                  <div class={`${styles.choice} ${heroStyle}`}>
+                    <HeroIcon hero={h} i_width="256" i_height="144" 
+                      clickHandler={this.selectAnswer} />
+                  </div>
                 </div>
               ); 
             }
           })}
         </div>
-        <div>
-          <button onClick={() => this.start()}>Start</button>
-        </div>
-        <div>{score}</div>
       </div>
-    );
+    ) : <div></div>;
   }
 }
 
@@ -139,3 +224,16 @@ const mapStateToProps = (state) => {
 };
 
 export default connect(mapStateToProps)(CounterQuiz);
+
+
+/*
+
+          <div className="answer">
+            <div className="result">  
+              {result}
+            </div>
+            <div className="answerHero">
+              {aHero && <HeroIcon hero={aHero} clickHandler={null} />}
+            </div>
+          </div>
+*/

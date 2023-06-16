@@ -26,7 +26,9 @@ class HeroSearch extends React.Component {
         <div className="search">
           <input type='search' name='search' ref={this.searchRef} className='form-control' onChange={(e) => this.handleSearchInputChange()} />
         </div>
-        <button onClick={() => this.searchHeroes()}>Search</button>
+        <span class="icon">
+          <i class="fas fa-user" onClick={() => this.searchHeroes()}></i>
+        </span>
       </div>
     )
   }
@@ -37,3 +39,6 @@ HeroSearch.propTypes = {
 }
 
 export default HeroSearch;
+
+
+//         <button onClick={() => this.searchHeroes()}>Search</button>

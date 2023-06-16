@@ -6,7 +6,7 @@ import {
   UPDATE_RECOMMENDATIONS_SUCCESS, 
   ANALYTICS_SUCCESS,
   LOAD_DRAFT_SUCCESS, 
-} from './DraftActions';
+} from './DraftActions'; 
 
 const initialState = {
   radiant: [],
@@ -18,6 +18,7 @@ const initialState = {
     r_C: [], r_M: [], r_O: [], r_4: [], r_5: [],
     d_C: [], d_M: [], d_O: [], d_4: [], d_5: [],
   },
+  LOCKED: [], // used to track positions that are locked 
 
   search: [], 
   analytics: { 
@@ -29,6 +30,16 @@ const initialState = {
 
 const DraftReducer = (state = initialState, action) => {
   switch(action.type) {
+
+    case UPDATE_LANES_SUCCESS:
+      return Object.assign({}, state, {
+        positions: {
+          ...state.positions,
+          ...action.positions, 
+        }
+      })
+
+
 
     case UPDATE_DRAFT_SUCCESS:
       return Object.assign({}, state, {
@@ -51,11 +62,6 @@ const DraftReducer = (state = initialState, action) => {
     case SEARCH_RECOMMENDATIONS_SUCCESS:
       return Object.assign({}, state, {
         search: action.results, 
-      });
-
-    case UPDATE_LANES_SUCCESS:
-      return Object.assign({}, state, {
-        positions: action.positions, 
       });
     
     case LOAD_DRAFT_SUCCESS:
@@ -83,6 +89,12 @@ export const getAnalytics = (state) => state.draft.analytics;
 
 // basically get specific heroes from 'recommendations' collection
 export const searchRecommendationsByName = (state, name) => {
+
+  // return nothing if no filter string is provided
+  if(name.length < 1) {
+    return [];
+  }
+
   const regex = new RegExp(name, 'i');
   let heroes = [];
   let names = [];

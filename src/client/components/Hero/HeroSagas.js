@@ -8,7 +8,8 @@ import { getDifferenceInDays } from '../../util/DateUtil';
 import {
   SEARCH_HEROES_REQUEST, FETCH_HERO_REQUEST, ADD_HERO_REQUEST,
   searchHeroesSuccess, fetchHeroSuccess, addHeroSuccess,
-  searchHeroesError, fetchHeroError, addHeroError, addHeroRequest, UPDATE_HERO_REQUEST, updateHeroSuccess,
+  searchHeroesError, fetchHeroError, addHeroError, 
+  addHeroRequest, UPDATE_HERO_REQUEST, updateHeroSuccess,
 } from './HeroActions'; 
 
 
@@ -42,9 +43,10 @@ function addHero(hero) {
   .catch(err => { throw err; })
 }
 
-//update Hero api call
-function updateHero(hero, heroId) {
-  return axios.put(`api/heroes/${heroId}`, hero)
+// update Hero api call
+// 'updates' is object with one or more updated fields
+function updateHero(updates, heroId) {
+  return axios.put(`api/heroes/${heroId}`, updates)
   .then(res => res.data)
   .catch(err => { throw err; })
 }
@@ -118,7 +120,7 @@ export function* updateHeroHandler(action) {
     yield put(updateHeroSuccess(res.hero));
   } catch(error) {
     console.log(error);
-    yield put(updateHeroError(error));
+    //yield put(updateHeroError(error));
   }
 }
 

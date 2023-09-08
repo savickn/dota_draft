@@ -7,7 +7,7 @@ import { withRouter } from 'react-router';
 import styles from './App.scss';
 import routes from '../../routes';
 
-import DevTools from '../../util/devTools';
+//import DevTools from '../../util/devTools';
 import Header from './components/Header/Header';
 
 /*import Footer from './components/Footer/Footer';
@@ -81,7 +81,7 @@ class App extends React.Component {
             },
           ]}*/
         />
-        <DevTools />
+        { /* <DevTools /> */ }
         {
           this.props.isLoading ? <div>Loading...</div> :
           <div>

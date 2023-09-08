@@ -4,11 +4,8 @@
 import mongoose from 'mongoose';
 import Winston from 'winston';
 
-//import redis_client from './redis';
+//import redis_client from './dependencies/redis';
 import * as scrapers from './scraper/scrape';
-
-//const scrapers = require('./scraper/scrape');
-const scraperTests = require('./scraper/tests');
 
 
 const logger = Winston.createLogger({
@@ -30,9 +27,7 @@ mongoose.connect('mongodb://localhost/dota_draft_dev')
     
     try {
       console.log('cli args --> ', process.argv);
-      
-      await scraperTests.testAll();
-      //await scrapers.scrapeAll();
+      await scrapers.scrapeAll();
       
     } catch(error) {
       console.error('catch block error --> ', error);

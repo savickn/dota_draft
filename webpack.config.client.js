@@ -85,7 +85,11 @@ const devRules = [
 module.exports = function(env) {
   console.log('Webpack ENV Variables --> ', env);
 
-  var plugins = [];
+  var plugins = [
+    /*new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),*/
+  ];
 
   if(env.env === 'development') {
     plugins.push(new webpack.HotModuleReplacementPlugin());
@@ -143,10 +147,11 @@ module.exports = function(env) {
         './node_modules',
         './src',
       ],
-      extensions: ['*', '.js', '.jsx'],
-      fallback: {
-        "path": require.resolve("path-browserify")
+      alias: {
+        process: "process/browser",
+        path: require.resolve("path-browserify")
       },
+      extensions: ['*', '.js', '.jsx'],
     },
     plugins,
   };

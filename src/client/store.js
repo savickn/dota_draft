@@ -5,7 +5,7 @@ import createSagaMiddleware from 'redux-saga';
 
 import reducers from './reducers';
 import sagas from './sagas';
-import DevTools from './util/devTools';
+//import DevTools from './util/devTools';
 
 const preloadedState = window.__PRELOADED_STATE__;
 console.log('preloadedState client --> ', preloadedState);
@@ -33,7 +33,7 @@ const registerEnhancers = (history) => {
       routerMiddleware(history),
       sagaMiddleware,
     ),
-    DevTools.instrument()
+    //DevTools.instrument()
   )
 }
 

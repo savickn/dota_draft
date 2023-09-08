@@ -42,12 +42,14 @@ console.log(`node_env --> ${process.env.NODE_ENV}`);
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect(config.mongo.uri, (error) => {
-  if(error) {
-    console.error('Please make sure Mongodb is installed and running!'); // eslint-disable-line no-console
-    throw error;
-  };
-})
+mongoose.connect(config.mongo.uri)
+    .then(() => {
+      console.log('Connected to MongoDB');
+    })
+    .catch((error) => {
+      console.error('Please make sure Mongodb is installed and running!'); // eslint-disable-line no-console
+      throw error;
+    })
 
 require('./express').default(app);
 require('./routes').default(app);

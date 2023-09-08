@@ -52,6 +52,9 @@ const sassLoader = {
 // for transpiling ES6 JavaScript
 const babelLoader = {
   test: /\.(js|jsx)$/,
+  resolve: {
+    fullySpecified: false,
+  },
   exclude: [/node_modules/, /\*\.config.js/],
   loader: 'babel-loader',
 };

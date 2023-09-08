@@ -13,10 +13,9 @@ export const addHero = (req, res) => {
 
   console.log('create hero --> ', newHero);
 
-  Hero.create(newHero, function(err, hero) {
-    if (err) { return res.status(500).send(err); };
-    return res.status(201).json({ hero });
-  });
+  Hero.create(newHero)
+    .then(hero => res.status(201).json({ hero }))
+    .catch(err => res.status(500).send(err));
 };
 
 // retrieve all heroes
@@ -30,20 +29,23 @@ export const getHeroes = (req, res) => {
   };
   console.log('getHeroes --> ', query);
 
-  Hero.find(query).sort({'localized_name': 1}).exec(function(err, heroes) {
-    if (err) { return res.status(500).send(err); };
-    console.log('heroes --> ', heroes.length);
-    return res.status(200).json({ heroes });
-  });
+  Hero.find(query)
+    .sort({'localized_name': 1})
+      .then(heroes => {
+        console.log('heroes --> ', heroes.length);
+        return res.status(200).json({ heroes });
+      })
+      .catch(err => res.status(500).send(err));
 }
 
 // get 1 hero
 export const getHero = (req, res) => {
-  Hero.findById(req.params.id, function(err, hero) {
-    if (err) { return res.status(500).send(err); };
-    console.log(hero);
-    return res.status(200).json({ hero });
-  });
+  Hero.findById(req.params.id)
+    .then(hero => {
+      console.log(hero);
+      return res.status(200).json({ hero });
+    })
+    .catch(err => res.status(500).send(err));
 };
 
 
@@ -63,14 +65,11 @@ export const updateHero = (req, res) => {
   console.log(updateObj);
 
   Hero.findOneAndUpdate(
-    {'_id': req.params.id},
-    updateObj,
-    {upsert: true, new: true},
-    function (err, hero) {
-      if(err) return res.status(500).send(err);
-      return res.status(203).json({hero});
-    }
-  );
+      {'_id': req.params.id},
+      updateObj,
+      {upsert: true, new: true})
+    .then(hero => res.status(203).json({hero}))
+    .catch(err => res.status(500).send(err));
 
   /*Hero.findById(req.params.id, function(err, hero) {
     if(err) return res.status(500).send(err);
@@ -85,8 +84,7 @@ export const updateHero = (req, res) => {
 
 // used to delete a hero
 export const deleteHero = (req, res) => {
-  Hero.findOneAndRemove({_id: req.params.id}, function(err, hero) {
-    if (err) return res.status(500).send(err);
-    return res.status(200).end();
-  });
+  Hero.findOneAndRemove({_id: req.params.id})
+    .then(hero => res.status(200).end())
+    .catch(err => res.status(500).send(err));
 };

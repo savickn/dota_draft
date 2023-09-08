@@ -39,6 +39,8 @@ const options = {
 
 import { scalingFeatures, teamFeatures } from '../../Hero/constants/attributes';
 
+import styles from './Composition.scss';
+
 class TeamComposition extends React.Component { 
   
   constructor(props) {
@@ -73,11 +75,88 @@ class TeamComposition extends React.Component {
     return graphData;
   }
 
-  getAnalysis = (radiantStats, direStats) => {
-    let analysis = {};
+  analyseTeam = (heroes, stats) => {
+    console.log(stats);
+    console.log(heroes);
+
+    let res = {
+      'Initiation' : [false, ""],
+      'Tower-Taking': [false, ""],
+      'Roshan': [false, ""],
+    };
+
+    let maxInitiation = 0;
+    let maxTower = 0;
+    let maxRosh = 0;
+    
+
+    let secondaryInitiation = 0;
+    let secondaryTower = 0;
+    let secondaryRosh = 0;
+
+    for(let h of heroes) {
+
+      let initiation;
+      let tower;
+      let rosh;
+
+      for(let c of h['contributions']) {
+        if(c.feature === 'Initiation') initiation = c.value;
+        if(c.feature === 'Roshan') rosh = c.value;
+        if(c.feature === 'Tower-Taking') tower = c.value;
+      }
+
+      // check for initiator
+      if(initiation >= 4 && initiation > maxInitiation) {
+        maxInitiation = initiation;
+        res['Initiation'] = [true, h['localized_name']];
+      };
+      if(initiation === 3) secondaryInitiation++;
+
+      // check for tower-hitter
+      if(tower >= 4 && tower > maxTower) {
+        maxTower = tower;
+        res['Tower-Taking'] = [true, h['localized_name']];
+      }
+      if(tower === 3) secondaryTower++;
+
+      // check for Roshan
+      if(rosh >= 4 && rosh > maxRosh) {
+        maxRosh = rosh;
+        res['Roshan'] = [true, h['localized_name']];
+      }
+      if(rosh === 3) secondaryRosh++;
+    }
+
+    // check secondaries
+    if(secondaryInitiation >= 3) res['Initiation'] = [true, "Team Effort"];
+    if(secondaryTower >= 3) res['Tower-Taking'] = [true, "Team Effort"];
+    if(secondaryRosh >= 3) res['Roshan'] = [true, "Team Effort"];
+
+    // check pickoff OR teamfight
+    if(stats['Teamfight'] - stats['Pickoff'] > 2) res['Strategy'] = "Focus on Teamfights";
+    if(stats['Pickoff'] - stats['Teamfight'] > 2) res['Strategy'] = "Focus on Pickoffs";
 
 
-    return analysis;
+    console.log('res -- ', res);
+    return res;
+  }
+
+  compareTeams = (t1, t2) => {
+    // waveclear
+
+
+    // lane strength 
+
+
+    // scaling / teamfight
+
+
+    // vision
+
+
+    // pace
+
   }
 
   getAverage = (elems) => {
@@ -116,13 +195,34 @@ class TeamComposition extends React.Component {
     return stats;
   }
 
+
+  /* UI Elements */
+
+  getTeamStatElement = (statName, analysis) => {
+    let bool = analysis[0];
+    let hero = analysis[1];
+
+    return (
+      <div className="row">
+        <div className="label">{statName}</div>
+        <div className={""}></div>
+        <div className="hero"></div>
+      </div>
+    );
+  }
+
+
+
   render() {
     let { radiant, dire, } = this.props; 
     let radiantStats = this.getStats(radiant);
     let direStats = this.getStats(dire);
 
     let graphData = this.buildGraph(radiantStats, direStats);
-    let analysis = this.getAnalysis(radiantStats, direStats);
+
+    let radiantAnalysis = this.analyseTeam(radiant, radiantStats);
+    let direAnalysis = this.analyseTeam(dire, direStats);
+    let comparativeAnalysis = this.compareTeams(radiant, dire);
 
     return (
       <div className='flex-column'>
@@ -130,13 +230,23 @@ class TeamComposition extends React.Component {
           <Line options={options} data={graphData} />
         </div>
         
-        <div className='comparison flex-column'>
-          <div className='radiant'>
+        <div className='comparison flex-row'>
+          <div className={`radiant ${styles.analysis}`}>
             <div>Radiant</div>
-            
+            {
+              Object.keys(radiantAnalysis).map(k => {
+                return <div>{radiantAnalysis[k]}</div>
+              })
+            }
+
           </div>
-          <div className='dire'>
+          <div className={`dire ${styles.analysis}`}>
             <div>Dire</div>
+            {
+              Object.keys(direAnalysis).map(k => {
+                return <div>{direAnalysis[k]}</div>
+              })
+            }
             
           </div>
         </div>

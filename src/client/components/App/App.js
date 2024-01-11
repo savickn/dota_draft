@@ -26,10 +26,11 @@ import { logOut } from '../User/AccountActions';
 import { getCurrentUser, getAccountStatus } from '../User/AccountReducer';
 import { isLoading } from './AppReducer';
 
+
 /* other */
 
 import { heroDataRequest } from '../OpenDota/OpenDotaActions';
-
+import { syncHeroesRequest } from '../Hero/HeroActions';
 
 class App extends React.Component {
 
@@ -43,6 +44,9 @@ class App extends React.Component {
 
     // get openDota API data from localStorage
     this.props.dispatch(heroDataRequest());
+
+    // get hero data from server
+    this.props.dispatch(syncHeroesRequest());
   }
 
   logOut = () => {

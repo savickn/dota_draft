@@ -4,6 +4,7 @@ import {
   FETCH_HERO_REQUEST, FETCH_HERO_SUCCESS, FETCH_HERO_ERROR, 
   ADD_HERO_REQUEST, ADD_HERO_SUCCESS, ADD_HERO_ERROR, 
   UPDATE_HERO_REQUEST, UPDATE_HERO_SUCCESS, UPDATE_HERO_ERROR, 
+  SYNC_HEROES_REQUEST, SYNC_HEROES_SUCCESS,
 } from './HeroActions';
 
 import { updateByObjectId } from '../../libs';
@@ -12,6 +13,7 @@ const initialState = {
   status: 'IDLE',
   errors: null,
   data: [], 
+  search: [],
   current: null, 
 };
 
@@ -21,7 +23,7 @@ const HeroReducer = (state = initialState, action) => {
     case SEARCH_HEROES_REQUEST:
       return {
         status: 'LOADING',
-        data: [], 
+        search: [], 
         errors: state.errors, 
       };
 
@@ -29,14 +31,29 @@ const HeroReducer = (state = initialState, action) => {
       return {
         status: 'IDLE',
         errors: null,
-        data: action.payload.heroes, 
+        search: action.payload.heroes, 
       };
 
     case SEARCH_HEROES_ERROR:
       return {
         status: 'ERROR',
-        data: [], 
+        search: [], 
         errors: action.errors, 
+      };
+
+
+    case SYNC_HEROES_REQUEST:
+      return {
+        status: 'LOADING',
+        data: [], 
+        errors: state.errors, 
+      };
+
+    case SYNC_HEROES_SUCCESS:
+      return {
+        status: 'IDLE',
+        errors: null,
+        data: action.heroes, 
       };
 
 
@@ -94,12 +111,15 @@ const HeroReducer = (state = initialState, action) => {
       });
 
     
+
+    
     default:
       return state;
   }
 }
 
 export const getHeroes = (state) => state.heroes.data;
+export const getHeroesSearch = (state) => state.heroes.data;
 export const getHero = (state, id) => state.heroes.data.filter(elem => elem._id === id)[0];
 //export const getHero = (state, id) => state.heroes.current[0];
 

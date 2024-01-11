@@ -10,14 +10,17 @@ import {
   searchHeroesSuccess, fetchHeroSuccess, addHeroSuccess,
   searchHeroesError, fetchHeroError, addHeroError, 
   addHeroRequest, UPDATE_HERO_REQUEST, updateHeroSuccess,
+  SYNC_HEROES_REQUEST, syncHeroesSuccess
 } from './HeroActions'; 
 
+import * as heroService from './HeroService';
 
 /*
 ** API Requests
 */
 
-// get Products based on search criteria
+// sync all heroes to localStorage
+// or retrieve subset of heroes based on query args
 function searchHeroes(search={}, pagination={}) {
   return axios.get('api/heroes', {
     params: {
@@ -51,7 +54,7 @@ function updateHero(updates, heroId) {
   .catch(err => { throw err; })
 }
 
-/* SEARCH HEROES */
+/* SEARCH -- get subset of heroes (exclude unavailable heroes and search) */
 
 export function* searchHeroesWatcher() {
   yield takeLatest(SEARCH_HEROES_REQUEST, searchHeroesHandler);
@@ -68,6 +71,34 @@ export function* searchHeroesHandler(action) {
     yield put(searchHeroesError(error));
   }
 }
+
+
+/* SYNC - populate client-side with all heroes */
+
+export function* syncHeroesWatcher() {
+  yield takeLatest(SYNC_HEROES_REQUEST, syncHeroesHandler);
+}
+
+export function* syncHeroesHandler(action) {
+  try {
+    const isCached = heroService.isFresh();
+    if(isCached) {
+      console.log('hello');
+      const res = heroService.loadHeroes();
+      console.log('heroesFromLocalStorage --> ', res);
+      yield put(searchHeroesSuccess(res));
+    } else {
+      const res = yield call(searchHeroes);
+      console.log('heroesFromServer --> ', res);
+      heroService.saveHeroes(res.heroes);
+      yield put(searchHeroesSuccess(res.heroes));
+    }
+  } catch(error) {
+    console.log('fetchHeroes error --> ', error);
+    yield put(searchHeroesError(error));
+  }
+}
+
 
 /*
 ** get family of Products via 'pid'
@@ -126,6 +157,7 @@ export function* updateHeroHandler(action) {
 
 
 
+
 /*
 ** Export Watchers
 */
@@ -135,4 +167,5 @@ export default [
   fork(searchHeroesWatcher),
   fork(fetchHeroWatcher),
   fork(updateHeroWatcher),
+  fork(syncHeroesWatcher), 
 ];

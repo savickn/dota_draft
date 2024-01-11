@@ -116,10 +116,8 @@ export function syncHeroesRequest() {
 
 export function syncHeroesSuccess(heroes) {
   return {
-    type: SEARCH_HEROES_SUCCESS,
-    payload: {
-      heroes, 
-    } 
+    type: SYNC_HEROES_SUCCESS,
+    heroes
   }
 }
 

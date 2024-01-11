@@ -27,12 +27,10 @@ export const getHeroes = (req, res) => {
     const regex = new RegExp(`${search.text}`);
     query['localized_name'] = { $regex: regex, $options: 'i' };
   };
-  console.log('getHeroes --> ', query);
 
   Hero.find(query)
     .sort({'localized_name': 1})
       .then(heroes => {
-        console.log('heroes --> ', heroes.length);
         return res.status(200).json({ heroes });
       })
       .catch(err => res.status(500).send(err));

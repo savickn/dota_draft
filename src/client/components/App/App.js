@@ -26,10 +26,10 @@ import { logOut } from '../User/AccountActions';
 import { getCurrentUser, getAccountStatus } from '../User/AccountReducer';
 import { isLoading } from './AppReducer';
 
-
 /* other */
 
 import { heroDataRequest } from '../OpenDota/OpenDotaActions';
+
 
 class App extends React.Component {
 

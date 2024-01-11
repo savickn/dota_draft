@@ -6,6 +6,8 @@ import axios from '../../util/axiosCaller';
 
 import { searchRecommendationsByName, getDraft, } from './DraftReducer';
 
+import { calcD } from './util/DraftFuncs';
+
 /* imports */
 
 import { 
@@ -33,9 +35,9 @@ const positionMap = ['C', 'M', 'O', '4', '5'];
 
 function getMaxAtPosition(pool, i) {
   let posVals = pool.map(h => h.positionMatrix[i]);
-  console.log(posVals);
+  //console.log(posVals);
   let max = Math.max(...posVals);
-  console.log('max -- ', max);
+  //console.log('max -- ', max);
   return max;
 }
 
@@ -69,9 +71,9 @@ function mapPositions2(pool, target) {
     console.log(idx);
 
     pool = pool.sort((h1, h2) => h2.positionMatrix[idx] - h1.positionMatrix[idx]);
-    console.log('pool -- ', pool);
+    //console.log('pool -- ', pool);
     let hero = pool[0];
-    console.log('hero -- ', hero);
+    //console.log('hero -- ', hero);
 
     res[`${target}_${position}`] = [hero];
 
@@ -330,8 +332,17 @@ export function* getRecommendationsWatcher() {
 export function* getRecommendationsHandler(action) {
   try {
     // get draft data from server
-    const { recommendations, radiant, dire } = yield call(getHeroRecsByWinrate, action.payload);
+    //const { recommendations, radiant, dire } = yield call(getHeroRecsByWinrate, action.payload);
     
+    // change to localStorage except once per week
+    const { radHeroes, direHeroes, recommendedHeroes } = yield call(getHeroRecsByWinrate, action.payload);
+    console.log('rad --> ', radHeroes);
+    console.log('dire --> ', direHeroes);
+    console.log('rec --> ', recommendedHeroes);
+
+    const { radiant, dire, recommendations } = calcD(radHeroes, direHeroes, recommendedHeroes); 
+
+
     const lanes = yield call(determineLanes, radiant, dire);
     console.log(lanes);
 

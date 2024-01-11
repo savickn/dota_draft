@@ -52,6 +52,44 @@ function getSynergiesForHero(synergies, targets) {
   return res;
 }
 
+export const getHeroes = async (req, res) => {
+  let radiant = req.body.radiant;
+  let dire = req.body.dire;
+  let banned = req.body.banned ? req.body.banned : [];
+
+  let radiantHeroNames = radiant.map((elem) => elem.localized_name);
+  let direHeroNames = dire.map((elem) => elem.localized_name);
+  let bannedHeroNames = banned.map((elem) => elem.localized_name);
+  
+  let inUseHeroes = [...radiantHeroNames, ...direHeroNames, ...bannedHeroNames];
+
+  let rQuery = {'localized_name': {$in: radiantHeroNames}};
+  let dQuery = {'localized_name': {$in: direHeroNames}};
+
+  let norArr = inUseHeroes.map((elem) => {
+    return { 'localized_name' : elem }; 
+  });
+
+  let query = {}; // hero filter query
+  
+  if(norArr.length > 0) {
+    query['$nor'] = norArr; // exclude in-use heroes
+  };
+
+  try {
+    let radHeroes = await Hero.find(rQuery);
+    let direHeroes = await Hero.find(dQuery);
+    let recommendedHeroes = await Hero.find(query); 
+    //console.log(radHeroes);
+    //console.log(direHeroes);
+    //console.log(recommendedHeroes);
+    return res.status(200).json({ radHeroes, direHeroes, recommendedHeroes });
+  } catch(err) {
+    console.log(err);
+    return res.status(500).send(err);
+  }
+}
+
 
 export const getHeroRecommendationsByWinrate = async (req, res) => {
   let radiant = req.body.radiant;
@@ -62,12 +100,12 @@ export const getHeroRecommendationsByWinrate = async (req, res) => {
   let direHeroNames = dire.map((elem) => elem.localized_name);
   let bannedHeroNames = banned.map((elem) => elem.localized_name);
   
-  let inUserHeroes = [...radiantHeroNames, ...direHeroNames, ...bannedHeroNames];
+  let inUseHeroes = [...radiantHeroNames, ...direHeroNames, ...bannedHeroNames];
 
   let rQuery = {'localized_name': {$in: radiantHeroNames}};
   let dQuery = {'localized_name': {$in: direHeroNames}};
 
-  let norArr = inUserHeroes.map((elem) => {
+  let norArr = inUseHeroes.map((elem) => {
     return { 'localized_name' : elem }; 
   });
 
@@ -77,8 +115,8 @@ export const getHeroRecommendationsByWinrate = async (req, res) => {
     query['$nor'] = norArr; // exclude in-use heroes
   };
 
-  let radiantRes = [];
-  let direRes = [];
+  let radiantRes = []; // radiant heroes
+  let direRes = []; // dire heroes
 
   let carry = [];
   let mid = [];

@@ -19,6 +19,9 @@ export const UPDATE_HERO_REQUEST = 'UPDATE_HERO_REQUEST';
 export const UPDATE_HERO_SUCCESS = 'UPDATE_HERO_SUCCESS';
 export const UPDATE_HERO_ERROR = 'UPDATE_HERO_ERROR';
 
+export const SYNC_HEROES_REQUEST = 'SYNC_HEROES_REQUEST';
+export const SYNC_HEROES_SUCCESS = 'SYNC_HEROES_SUCCESS';
+
 /* ADD HERO */
 
 export function addHeroRequest(args) {
@@ -102,6 +105,24 @@ export function searchHeroesError(error) {
     error, 
   }
 }
+
+/* SYNC HEROES */
+
+export function syncHeroesRequest() {
+  return {
+    type: SYNC_HEROES_REQUEST,
+  }
+}
+
+export function syncHeroesSuccess(heroes) {
+  return {
+    type: SEARCH_HEROES_SUCCESS,
+    payload: {
+      heroes, 
+    } 
+  }
+}
+
 
 /* INDIVIDUAL HEROS */
 

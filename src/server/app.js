@@ -35,6 +35,7 @@ if (process.env.NODE_ENV === 'development') {
 
 console.log(`node_mode --> ${process.env.NODE_MODE}`);
 console.log(`node_env --> ${process.env.NODE_ENV}`);
+console.log(`mongo --> ${config.mongo.uri}`);
 
 /*
 ** Mongoose Setup

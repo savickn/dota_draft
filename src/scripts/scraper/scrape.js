@@ -14,11 +14,14 @@ import * as helpers from './helpers/helpers';
 import * as constants from './helpers/constants';
 
 //import * as controller from '../../server/api/HeroData/h_data.controller';
-//import * as controller from '../../server/api/Hero/hero.controller';
+import * as controller from '../../server/api/Hero/hero.controller';
 
 
-const EXECUTABLE_PATH = '/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe';
-const USER_DATA_DIR = '/mnt/c/Users/Nick/Desktop/chrometest';
+// const EXECUTABLE_PATH = '/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe';
+// const USER_DATA_DIR = '/mnt/c/Users/Nick/Desktop/chrometest';
+
+const EXECUTABLE_PATH = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe';
+const USER_DATA_DIR = 'C:/Users/Nick/Desktop/chrometest';
 
 export const scrapeAll = async () => {
   const browser = await puppeteer.launch({ 
@@ -56,14 +59,14 @@ export const scrapeAll = async () => {
   try {
 
   /* dotabuff -- COUNTERS */
-  /*let links = await dotabuff.scrapeHeroes(page);
+  let links = await dotabuff.scrapeHeroes(page);
   console.log(links);
 
   for(let link of links) {
     let hero = await dotabuff.scrapeMatchups(page, link);
     console.log("hero -- ", hero);
     let res = await controller.updateMatchups(hero.hero, hero.winrate, hero.matchups);
-  }*/
+  }
 
   /* stratz -- SYNERGIES */
   /*for(let h of heroes) {
@@ -77,12 +80,12 @@ export const scrapeAll = async () => {
   }*/
 
   /* protracker -- POSITIONS */
-  let hs = Object.values(heroMap);
-  for(let h of hs.slice(28)) { 
-    let position = await protracker.scrapePositions(page, h);
-    console.log(h, ' -- ', position);
-    await controller.updatePosition(h, position);
-  }
+  // let hs = Object.values(heroMap);
+  // for(let h of hs.slice(28)) { 
+  //   let position = await protracker.scrapePositions(page, h);
+  //   console.log(h, ' -- ', position);
+  //   await controller.updatePosition(h, position);
+  // }
 
   /* opendota -- hero stats */
   //let heroJson = await opendota.scrapeStats();

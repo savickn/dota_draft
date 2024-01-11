@@ -20,7 +20,7 @@ const logger = Winston.createLogger({
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb://localhost/dota_draft_dev')
+mongoose.connect('mongodb://127.0.0.1/dota_draft_dev')
   .then(async (db) => {
     logger.log('info', 'Connected to mongoDB!');
     console.log('Connected to MongoDB!');

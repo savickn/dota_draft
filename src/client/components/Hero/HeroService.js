@@ -1,10 +1,12 @@
 
 
+// need to fix space requirement of 'heroes' in localStorage
+
 export const isFresh = () => {
   const heroData = localStorage.getItem('heroes');
   if(heroData) {
-    contents = JSON.parse(heroData);
-    curr = Date.now();
+    const contents = JSON.parse(heroData);
+    const curr = Date.now();
     return curr - contents.timestamp < 604800000;
   } else {
     return false;

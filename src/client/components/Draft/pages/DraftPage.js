@@ -49,6 +49,7 @@ class DraftPage extends React.Component {
     this.state = {
       navState: 'RECOMMENDATIONS', 
       selectedHero: {}, // represents hero shown in modal
+      hoveredElem: null, // represents the element over which an overlay should be drawn
     };
 
     this.saveRef = React.createRef();
@@ -81,9 +82,11 @@ class DraftPage extends React.Component {
       radiant.push(hero);
     } else if(team === 'DIRE' && dire.length < 5) {
       dire.push(hero);
+    } else {
+      // add error message
     }
 
-    this.props.dispatch(updateRecommendationsRequest({radiant, dire}));
+    this.props.dispatch(updateRecommendationsRequest({ radiant, dire }));
   }
 
   handleRemoveHero = (hero) => {
@@ -239,6 +242,22 @@ class DraftPage extends React.Component {
   }
 
 
+  /* UI features */
+
+  
+  showOverlay = (evt) => {
+    console.log(evt);
+    evt.stopPropagation();
+    this.setState({ hoveredElem: evt.target.id })
+  }
+
+  hideOverlay = () => {
+    this.setState({ hoveredElem: null });
+  }
+
+
+
+
   /* misc */
 
 
@@ -295,12 +314,27 @@ class DraftPage extends React.Component {
             <div className='radiant-header'>RADIANT</div>
             <div className='radiant-heroes flex-row-viewport'>
               { Array.from(Array(5).keys()).map((n) => {
+                console.log('heroId -- ', radiant[n])
                 let src = radiant[n] ? getImgSrcString(radiant[n].localized_name) : '//:0';
-                return <img src={src} 
-                  style={{backgroundColor: 'grey'}} 
-                  width='256' height='144' 
-                  onClick={(e) => this.setSelectedHero(radiant[n], 'RAD')}/>;
+                let elem = radiant[n] ? (
+                  <span className={styles.overlayContainer}>
+                    <img src={src} 
+                      className={styles.selectedHeroElem}
+                      onClick={(e) => this.setSelectedHero(radiant[n], 'RAD')}
+                      onMouseOver={(e) => this.showOverlay(e) }
+                      onMouseOut={(e) => this.hideOverlay()}/>
+                    <span className={styles.overlay}>
+                      <button className={styles.overlayBtn}>Info</button>
+                      <button className={styles.overlayBtn}>Remove</button>
+                    </span>
+                  </span>
+                ) : <span className={styles.selectedHeroElem}></span>
+
+                return elem;
               })}
+              { this.state.hoveredElem &&
+                <div></div>
+              }
             </div>
           </div>
           

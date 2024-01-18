@@ -83,7 +83,6 @@ export function* syncHeroesHandler(action) {
   try {
     const isCached = heroService.isFresh();
     if(isCached) {
-      console.log('hello');
       const res = heroService.loadHeroes();
       console.log('heroesFromLocalStorage --> ', res);
       yield put(searchHeroesSuccess(res));

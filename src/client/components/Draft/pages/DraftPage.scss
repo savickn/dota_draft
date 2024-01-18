@@ -1,4 +1,53 @@
 
+.overlayContainer {
+  position: relative;
+  text-align: center;
+  width: 256px;
+  height: 144px;
+}
+
+
+
+// for each selected Radiant and Dire hero
+.selectedHeroElem {
+  background-color: grey; 
+  width: 256px; 
+  height: 144px;
+  margin: 1px;
+}
+
+.overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 256px;
+  height: 144px;
+  background-color: rgba($color: #000000, $alpha: 0.0);
+  color: white;
+  padding: 1px;
+}
+
+.overlayBtn {
+  width: 70%;
+  height: 50px;
+
+  .info {
+
+  }
+
+  .remove {
+    
+  }
+}
+
+
+
+
 .nav-content {
   width: 100%;
 }
